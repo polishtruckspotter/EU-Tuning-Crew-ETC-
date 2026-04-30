@@ -3,7 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "npx serve -l 3000",
-    "start": "npx serve -l 3000"
+    "dev": "serve -l 3000",
+    "start": "serve -l 3000"
+  },
+  "dependencies": {
+    "serve": "^14.2.6"
+  },
+  "dependencies": {
+    "serve": "^14.2.6"
   }
 }
