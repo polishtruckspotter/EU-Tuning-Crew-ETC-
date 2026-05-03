@@ -29,8 +29,8 @@
       min-height: 100vh;
       color: var(--text);
       background:
-        radial-gradient(circle at top left, rgba(31, 242, 210, 0.12), transparent 32%),
-        radial-gradient(circle at top right, rgba(31, 242, 210, 0.08), transparent 26%),
+        radial-gradient(circle at top left, rgba(255, 183, 0, 0.12), transparent 32%),
+        radial-gradient(circle at top right, rgba(255, 183, 0, 0.08), transparent 26%),
         linear-gradient(180deg, #09090d 0%, #0a0a0f 48%, #07070b 100%);
       font-family: "Manrope", sans-serif;
       overflow-x: hidden;
@@ -44,88 +44,13 @@
       overflow: hidden;
       z-index: 0;
     }
-    .language-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 40;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 28px;
-      background: rgba(6, 7, 10, 0.78);
-      backdrop-filter: blur(12px);
-    }
-    .language-overlay.is-visible {
-      display: flex;
-    }
-    .language-modal {
-      width: min(100%, 1530px);
-      padding: 42px 46px 46px;
-      border-radius: 42px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background:
-        radial-gradient(circle at center, rgba(31, 242, 210, 0.1), transparent 28%),
-        linear-gradient(180deg, rgba(17, 18, 24, 0.94), rgba(10, 10, 15, 0.96));
-      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.5);
-    }
-    .language-overlay-title {
-      margin: 0 0 18px;
-      font-family: "Anton", sans-serif;
-      font-size: clamp(3rem, 7vw, 6rem);
-      line-height: 0.92;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-    }
-    .language-overlay-copy {
-      max-width: 58rem;
-      margin: 0 0 32px;
-      color: rgba(255, 255, 255, 0.88);
-      font-family: "Manrope", sans-serif;
-      font-size: clamp(1rem, 1.7vw, 1.2rem);
-      line-height: 1.35;
-    }
-    .language-card-grid {
-      display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      gap: 22px;
-    }
-    .language-card {
-      min-height: 160px;
-      padding: 24px 18px;
-      border-radius: 30px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: linear-gradient(180deg, rgba(33, 34, 42, 0.9), rgba(21, 22, 29, 0.82));
-      color: #f5eee2;
-      cursor: pointer;
-      text-align: center;
-      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-    .language-card:hover,
-    .language-card.is-active {
-      transform: translateY(-4px);
-      border-color: rgba(22, 255, 212, 0.85);
-      box-shadow: 0 0 28px rgba(22, 255, 212, 0.16);
-    }
-    .language-card-code {
-      font-family: "Space Grotesk", sans-serif;
-      font-size: 2rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-    .language-card-name {
-      font-family: "Manrope", sans-serif;
-      font-size: 1rem;
-      color: rgba(255, 255, 255, 0.9);
-    }
     .particle {
       position: absolute;
       width: var(--size);
       height: var(--size);
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(31, 242, 210, 0.95) 0%, rgba(31, 242, 210, 0.45) 45%, rgba(31, 242, 210, 0) 75%);
-      box-shadow: 0 0 14px rgba(31, 242, 210, 0.45);
+      background: radial-gradient(circle, rgba(255, 197, 54, 0.95) 0%, rgba(255, 183, 0, 0.45) 45%, rgba(255, 183, 0, 0) 75%);
+      box-shadow: 0 0 14px rgba(255, 183, 0, 0.45);
       opacity: 0.9;
       animation: drift var(--duration) linear infinite;
       animation-delay: var(--delay);
@@ -163,9 +88,9 @@
       width: 56px;
       height: 56px;
       border-radius: 18px;
-      border: 1px solid rgba(31, 242, 210, 0.45);
-      background: rgba(31, 242, 210, 0.08);
-      box-shadow: 0 0 28px rgba(31, 242, 210, 0.16);
+      border: 1px solid rgba(255, 183, 0, 0.45);
+      background: rgba(255, 183, 0, 0.08);
+      box-shadow: 0 0 28px rgba(255, 183, 0, 0.16);
       overflow: hidden;
       flex: 0 0 auto;
     }
@@ -187,7 +112,6 @@
       letter-spacing: 0.22em;
       text-transform: uppercase;
       white-space: nowrap;
-      color: #f5efe4;
     }
     .brand-subtitle {
       font-family: "IBM Plex Mono", monospace;
@@ -233,7 +157,7 @@
     .nav-link:hover,
     .nav-link.is-active {
       background: rgba(255, 255, 255, 0.04);
-      border-color: rgba(31, 242, 210, 0.22);
+      border-color: rgba(255, 183, 0, 0.22);
       color: #fff;
     }
     .nav-link:hover::after,
@@ -245,7 +169,7 @@
       gap: 10px;
       padding: 10px 14px;
       border-radius: 999px;
-      border: 1px solid rgba(31, 242, 210, 0.18);
+      border: 1px solid rgba(255, 183, 0, 0.18);
       background: rgba(255, 255, 255, 0.03);
       font-family: "Space Grotesk", sans-serif;
       font-size: 0.8rem;
@@ -260,7 +184,7 @@
       position: absolute;
       inset: -1px;
       border-radius: inherit;
-      background: conic-gradient(from 0deg, transparent, rgba(31, 242, 210, 0.5), transparent 55%);
+      background: conic-gradient(from 0deg, transparent, rgba(255, 183, 0, 0.5), transparent 55%);
       animation: spin 4s linear infinite;
       z-index: -2;
     }
@@ -284,6 +208,79 @@
     @keyframes pulseDot {
       0%, 49% { background: var(--success); box-shadow: 0 0 16px rgba(88, 255, 135, 0.88); }
       50%, 100% { background: var(--danger); box-shadow: 0 0 16px rgba(255, 77, 93, 0.88); }
+    }
+    .language-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      background: rgba(6, 7, 10, 0.78);
+      backdrop-filter: blur(12px);
+    }
+    .language-overlay.is-visible { display: flex; }
+    .language-modal {
+      width: min(100%, 1530px);
+      padding: 42px 46px 46px;
+      border-radius: 42px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background:
+        radial-gradient(circle at center, rgba(31, 242, 210, 0.1), transparent 28%),
+        linear-gradient(180deg, rgba(17, 18, 24, 0.94), rgba(10, 10, 15, 0.96));
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.5);
+    }
+    .language-overlay-title {
+      margin: 0 0 18px;
+      font-family: "Anton", sans-serif;
+      font-size: clamp(3rem, 7vw, 6rem);
+      line-height: 0.92;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    .language-overlay-copy {
+      max-width: 58rem;
+      margin: 0 0 32px;
+      color: rgba(255, 255, 255, 0.88);
+      font-family: "Manrope", sans-serif;
+      font-size: clamp(1rem, 1.7vw, 1.2rem);
+      line-height: 1.35;
+    }
+    .language-card-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 22px;
+    }
+    .language-card {
+      min-height: 160px;
+      padding: 24px 18px;
+      border-radius: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(33, 34, 42, 0.9), rgba(21, 22, 29, 0.82));
+      color: #f5eee2;
+      cursor: pointer;
+      text-align: center;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .language-card:hover,
+    .language-card.is-active {
+      transform: translateY(-4px);
+      border-color: rgba(31, 242, 210, 0.85);
+      box-shadow: 0 0 28px rgba(31, 242, 210, 0.16);
+    }
+    .language-card-code {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .language-card-name {
+      font-family: "Manrope", sans-serif;
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.9);
     }
     .language-trigger {
       display: inline-flex;
@@ -374,9 +371,7 @@
       box-shadow: none;
       backdrop-filter: none;
     }
-    .hero-copy::before {
-      display: none;
-    }
+    .hero-copy::before { display: none; }
     .eyebrow {
       display: inline-flex;
       align-items: center;
@@ -449,7 +444,7 @@
       min-height: 220px;
       padding: 24px;
       border-radius: 30px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.07);
       background: linear-gradient(180deg, rgba(25, 28, 34, 0.58), rgba(10, 10, 14, 0.72));
       backdrop-filter: blur(14px);
       display: flex;
@@ -485,9 +480,7 @@
       background: rgba(12, 13, 18, 0.38);
       backdrop-filter: blur(12px);
     }
-    .hero-visual::after {
-      display: none;
-    }
+    .hero-visual::after { display: none; }
     .floating-part {
       position: absolute;
       border-radius: 24px;
@@ -570,16 +563,16 @@
       text-align: center;
       transition: transform 0.22s ease, border-color 0.22s ease;
     }
-    .crew-card:hover { transform: translateY(-8px); border-color: rgba(31, 242, 210, 0.28); }
+    .crew-card:hover { transform: translateY(-8px); border-color: rgba(255, 183, 0, 0.28); }
     .avatar-frame {
       width: 110px;
       aspect-ratio: 1;
       margin: 0 auto 16px;
       clip-path: polygon(25% 6.7%, 75% 6.7%, 100% 50%, 75% 93.3%, 25% 93.3%, 0% 50%);
       overflow: hidden;
-      border: 1px solid rgba(31, 242, 210, 0.3);
-      background: rgba(31, 242, 210, 0.08);
-      box-shadow: 0 0 28px rgba(31, 242, 210, 0.12);
+      border: 1px solid rgba(255, 183, 0, 0.3);
+      background: rgba(255, 183, 0, 0.08);
+      box-shadow: 0 0 28px rgba(255, 183, 0, 0.12);
     }
     .avatar-frame img { width: 100%; height: 100%; object-fit: cover; }
     .crew-name {
@@ -595,6 +588,21 @@
       letter-spacing: 0.12em;
       text-transform: uppercase;
       line-height: 1.5;
+    }
+    .crew-km {
+      margin-top: 8px;
+      color: rgba(31, 242, 210, 0.94);
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      line-height: 1.45;
+      min-height: 2.9em;
+      text-shadow: 0 0 14px rgba(31, 242, 210, 0.18);
+    }
+    .crew-km.is-error {
+      color: rgba(246, 241, 233, 0.58);
+      text-shadow: none;
     }
     .join-layout {
       display: grid;
@@ -637,7 +645,7 @@
       border-radius: 50%;
       display: grid;
       place-items: center;
-      background: rgba(31, 242, 210, 0.14);
+      background: rgba(255, 183, 0, 0.14);
       color: var(--gold);
       font-family: "Orbitron", sans-serif;
       font-weight: 800;
@@ -679,7 +687,7 @@
       height: 10px;
       border-radius: 50%;
       background: var(--gold);
-      box-shadow: 0 0 14px rgba(31, 242, 210, 0.7);
+      box-shadow: 0 0 14px rgba(255, 183, 0, 0.7);
     }
     .button-stack { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 26px; }
     .mod-title-row {
@@ -704,8 +712,8 @@
       bottom: -10px;
       height: 3px;
       border-radius: 999px;
-      background: linear-gradient(90deg, rgba(31, 242, 210, 0), rgba(31, 242, 210, 0.95), rgba(31, 242, 210, 0));
-      box-shadow: 0 0 20px rgba(31, 242, 210, 0.4);
+      background: linear-gradient(90deg, rgba(255, 183, 0, 0), rgba(255, 183, 0, 0.95), rgba(255, 183, 0, 0));
+      box-shadow: 0 0 20px rgba(255, 183, 0, 0.4);
     }
     .fireworks {
       position: absolute;
@@ -719,7 +727,7 @@
       height: 6px;
       border-radius: 50%;
       background: var(--gold);
-      box-shadow: 0 0 14px rgba(31, 242, 210, 0.85);
+      box-shadow: 0 0 14px rgba(255, 183, 0, 0.85);
       animation: twinkle var(--speed) ease-in-out infinite;
       opacity: 0.9;
     }
@@ -733,9 +741,7 @@
       50% { transform: scale(1.4); opacity: 1; }
     }
     .mod-card { position: relative; overflow: hidden; }
-    .about-mod-wrap {
-      margin-top: 24px;
-    }
+    .about-mod-wrap { margin-top: 24px; }
     .link-panel {
       display: grid;
       gap: 16px;
@@ -774,18 +780,18 @@
     }
     .contact-button:hover {
       transform: translateY(-3px);
-      border-color: rgba(31, 242, 210, 0.28);
-      box-shadow: 0 0 22px rgba(31, 242, 210, 0.14);
+      border-color: rgba(255, 183, 0, 0.28);
+      box-shadow: 0 0 22px rgba(255, 183, 0, 0.14);
     }
     .signature {
       margin-top: 20px;
       text-align: center;
-      color: #1ff2d2;
+      color: #ffd24d;
       font-family: "IBM Plex Mono", monospace;
       font-size: 0.95rem;
       letter-spacing: 0.2em;
       text-transform: uppercase;
-      text-shadow: 0 0 12px rgba(31, 242, 210, 0.55);
+      text-shadow: 0 0 12px rgba(255, 183, 0, 0.55);
     }
     .contact-copy-strong {
       font-family: "DM Serif Display", serif;
@@ -805,7 +811,7 @@
       color: #efe6d8;
       transition: 0.2s ease;
     }
-    .link-chip:hover { transform: translateX(4px); border-color: rgba(31, 242, 210, 0.24); }
+    .link-chip:hover { transform: translateX(4px); border-color: rgba(255, 183, 0, 0.24); }
     .footer-note {
       max-width: var(--container);
       margin: 24px auto 0;
@@ -824,12 +830,6 @@
       .about-layout,
       .join-layout,
       .contact-grid { grid-template-columns: 1fr; }
-      .hero {
-        min-height: auto;
-      }
-      .language-card-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
     }
     @media (max-width: 1360px) {
       .topbar {
@@ -852,6 +852,9 @@
       .status-pill,
       .language-trigger {
         padding: 9px 12px;
+      }
+      .language-card-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
       }
     }
     @media (max-width: 800px) {
@@ -906,30 +909,12 @@
       <h2 class="language-overlay-title">SELECT LANGUAGE</h2>
       <p class="language-overlay-copy">Choose your route into the convoy. Your selected language is saved for future visits and can be changed anytime from the top-right language button.</p>
       <div class="language-card-grid">
-        <button class="language-card" type="button" data-language-card="en">
-          <div class="language-card-code">GB</div>
-          <div class="language-card-name">English</div>
-        </button>
-        <button class="language-card" type="button" data-language-card="de">
-          <div class="language-card-code">DE</div>
-          <div class="language-card-name">Deutsch</div>
-        </button>
-        <button class="language-card" type="button" data-language-card="fr">
-          <div class="language-card-code">FR</div>
-          <div class="language-card-name">Francais</div>
-        </button>
-        <button class="language-card" type="button" data-language-card="pl">
-          <div class="language-card-code">PL</div>
-          <div class="language-card-name">Polski</div>
-        </button>
-        <button class="language-card" type="button" data-language-card="es">
-          <div class="language-card-code">ES</div>
-          <div class="language-card-name">Espanol</div>
-        </button>
-        <button class="language-card" type="button" data-language-card="nl">
-          <div class="language-card-code">NL</div>
-          <div class="language-card-name">Nederlands</div>
-        </button>
+        <button class="language-card" type="button" data-language-card="en"><div class="language-card-code">GB</div><div class="language-card-name">English</div></button>
+        <button class="language-card" type="button" data-language-card="de"><div class="language-card-code">DE</div><div class="language-card-name">Deutsch</div></button>
+        <button class="language-card" type="button" data-language-card="fr"><div class="language-card-code">FR</div><div class="language-card-name">Francais</div></button>
+        <button class="language-card" type="button" data-language-card="pl"><div class="language-card-code">PL</div><div class="language-card-name">Polski</div></button>
+        <button class="language-card" type="button" data-language-card="es"><div class="language-card-code">ES</div><div class="language-card-name">Espanol</div></button>
+        <button class="language-card" type="button" data-language-card="nl"><div class="language-card-code">NL</div><div class="language-card-name">Nederlands</div></button>
       </div>
     </div>
   </div>
@@ -966,7 +951,7 @@
           <div class="hero-copy glass-card">
             <div class="eyebrow" data-i18n="heroEyebrow">Professional convoy operations</div>
             <h1 class="hero-title" data-i18n="heroTitle">Drive With The Best</h1>
-            <p class="hero-subtitle" data-i18n="heroSubtitle">A cinematic ETS2 Virtual Trucking Company built for serious convoys, clean style, and a crew that actually feels alive.</p>
+            <p class="hero-subtitle" data-i18n="heroSubtitle">Professional Virtual Trucking Company for convoy-focused drivers, cinematic runs, and a team that keeps things active.</p>
           </div>
           <div class="hero-visual">
             <div class="floating-part part-a">⚙</div>
@@ -990,16 +975,15 @@
           <div class="about-layout">
             <div class="stats-stack">
               <article class="stats-card"><div class="stats-number">100+</div><div class="stats-title" data-i18n="statDeliveriesTitle">Deliveries completed</div><div class="stats-text" data-i18n="statDeliveriesText">Steady progress with clean runs and convoy discipline.</div></article>
-              <article class="stats-card"><div class="stats-number">6</div><div class="stats-title" data-i18n="statDriversTitle">Active drivers</div><div class="stats-text" data-i18n="statDriversText">A close team that keeps the atmosphere friendly and active.</div></article>
+              <article class="stats-card"><div class="stats-number">5</div><div class="stats-title" data-i18n="statDriversTitle">Active drivers</div><div class="stats-text" data-i18n="statDriversText">A close team that keeps the atmosphere friendly and active.</div></article>
               <article class="stats-card"><div class="stats-number">5</div><div class="stats-title" data-i18n="statCountriesTitle">Countries covered</div><div class="stats-text" data-i18n="statCountriesText">Routes across multiple regions with room to keep growing.</div></article>
             </div>
             <div class="crew-grid">
-              <article class="crew-card"><div class="avatar-frame"><img src="Kot_w_swetrze_cieszy_sie_ramenem.png" alt="Polishtruckspotter profile"></div><div class="crew-name">Polishtruckspotter</div><div class="crew-role" data-i18n="rolePolish">Owner</div></article>
-              <article class="crew-card"><div class="avatar-frame"><img src="Zrzut ekranu 2026-04-08 180633.png" alt="olas12253 profile"></div><div class="crew-name">olas12253</div><div class="crew-role" data-i18n="roleOlas">Driver</div></article>
-              <article class="crew-card"><div class="avatar-frame"><img src="Zrzut ekranu 2026-04-08 181403.png" alt="TonBacon profile"></div><div class="crew-name">TonBacon</div><div class="crew-role" data-i18n="roleTon">Best driver and recruiter</div></article>
-              <article class="crew-card"><div class="avatar-frame"><img src="Zrzut ekranu 2026-04-08 181059.png" alt="MuBdel profile"></div><div class="crew-name">MuBdel [FURRY]:3</div><div class="crew-role" data-i18n="roleMu">Driver</div></article>
-              <article class="crew-card"><div class="avatar-frame"><img src="Zrzut ekranu 2026-04-08 181231.png" alt="Wazar profile"></div><div class="crew-name">Wazar</div><div class="crew-role" data-i18n="roleWazar">Recruiter, driver</div></article>
-              <article class="crew-card"><div class="avatar-frame"><img src="rollin half.png" alt="Rollin_noodle profile"></div><div class="crew-name">Rollin_noodle</div><div class="crew-role" data-i18n="roleRollin">Co-owner</div></article>
+              <article class="crew-card"><div class="avatar-frame"><img src="Kot_w_swetrze_cieszy_sie_ramenem.png" alt="Polishtruckspotter profile"></div><div class="crew-name">Polishtruckspotter</div><div class="crew-role" data-i18n="rolePolish">Owner</div><div class="crew-km" data-driver-km="polishtruckspotter" data-profile-url="https://trucksbook.eu/profile/570956">Loading all-time TrucksBook km...</div></article>
+              <article class="crew-card"><div class="avatar-frame"><img src="Zrzut ekranu 2026-04-08 180633.png" alt="olas12253 profile"></div><div class="crew-name">olas12253</div><div class="crew-role" data-i18n="roleOlas">Driver</div><div class="crew-km" data-driver-km="olas12253" data-profile-url="https://trucksbook.eu/profile/575831">Loading all-time TrucksBook km...</div></article>
+              <article class="crew-card"><div class="avatar-frame"><img src="Zrzut ekranu 2026-04-08 181403.png" alt="TonBacon profile"></div><div class="crew-name">TonBacon</div><div class="crew-role" data-i18n="roleTon">Best driver and recruiter</div><div class="crew-km" data-driver-km="tonbacon" data-profile-url="https://trucksbook.eu/profile/575664">Loading all-time TrucksBook km...</div></article>
+              <article class="crew-card"><div class="avatar-frame"><img src="Zrzut ekranu 2026-04-08 181059.png" alt="MuBdel profile"></div><div class="crew-name">MuBdel [FURRY]:3</div><div class="crew-role" data-i18n="roleMu">Driver</div><div class="crew-km" data-driver-km="mubdel" data-profile-url="https://trucksbook.eu/profile/386012">Loading all-time TrucksBook km...</div></article>
+              <article class="crew-card"><div class="avatar-frame"><img src="Zrzut ekranu 2026-04-08 181231.png" alt="Wazar profile"></div><div class="crew-name">Wazar</div><div class="crew-role" data-i18n="roleWazar">Recruiter, driver</div><div class="crew-km" data-driver-km="wazar" data-profile-url="https://trucksbook.eu/profile/597504">Loading all-time TrucksBook km...</div></article>
             </div>
           </div>
           <div class="about-mod-wrap">
@@ -1011,8 +995,6 @@
               </div>
               <div class="crew-grid">
                 <article class="crew-card"><div class="avatar-frame"><img src="Kot_w_swetrze_cieszy_sie_ramenem.png" alt="Polishtruckspotter mod team profile"></div><div class="crew-name">Polishtruckspotter</div><div class="crew-role" data-i18n="modRolePolish">Local modder</div></article>
-                <article class="crew-card"><div class="avatar-frame"><img src="rollin half.png" alt="Rollin_noodle mod team profile"></div><div class="crew-name">Rollin_noodle</div><div class="crew-role" data-i18n="modRoleRollin">Save editor, local modder</div></article>
-                <article class="crew-card"><div class="avatar-frame"><img src="pinguin2.png" alt="THE REAL PLUMZ mod team profile"></div><div class="crew-name">THE REAL PLUMZ</div><div class="crew-role" data-i18n="modRolePlumz">Save editor</div></article>
               </div>
               <div style="height: 18px;"></div>
               <div class="eyebrow" data-i18n="modReqEyebrow">Requirements</div>
@@ -1094,7 +1076,7 @@
         </div>
       </section>
     </main>
-    <div class="footer-note" data-i18n="footerNote">Tab mode active: menu links open sections in new browser tabs.</div>
+    <div class="footer-note" data-i18n="footerNote">Tab mode active: menu links switch sections inside one page.</div>
   </div>
   <script>
     const translations = {
@@ -1104,81 +1086,83 @@
         homeCardOneTitle: "24/7", homeCardOneText: "Operations with organized convoys, dispatch support, and reliable route planning.", homeCardTwoTitle: "VTC+", homeCardTwoText: "A polished community for drivers who care about standards, fun, and consistency.", homeCardThreeTitle: "ETS2", homeCardThreeText: "Focused on Euro Truck Simulator 2 and TruckersMP multiplayer journeys.", homeCardFourTitle: "EU", homeCardFourText: "Cross-border convoys with an international team and cinematic event style.",
         aboutEyebrow: "Meet the crew", aboutTitle: "Lead drivers keeping the convoy smooth.", aboutCopy: "We run a compact team with real personalities, reliable attendance, and a polished convoy identity across Europe.",
         statDeliveriesTitle: "Deliveries completed", statDeliveriesText: "Steady progress with clean runs and convoy discipline.", statDriversTitle: "Active drivers", statDriversText: "A close team that keeps the atmosphere friendly and active.", statCountriesTitle: "Countries covered", statCountriesText: "Routes across multiple regions with room to keep growing.",
-        rolePolish: "Owner", roleOlas: "Driver", roleTon: "Best driver and recruiter", roleMu: "Driver", roleWazar: "Recruiter, driver", roleRollin: "Co-owner",
+        rolePolish: "Owner", roleOlas: "Driver", roleTon: "Best driver and recruiter", roleMu: "Driver", roleWazar: "Recruiter, driver",
         joinEyebrow: "Requirements", joinTitle: "Join our fleet", joinCopy: "We welcome active, respectful drivers who want more than a casual tag. If that sounds like your pace, the fleet is ready.",
         stepOneTitle: "Check requirements", stepOneText: "Make sure you match the basics before applying.", stepTwoTitle: "Join our community", stepTwoText: "Hop into Discord and get familiar with the team.", stepThreeTitle: "Apply and drive", stepThreeText: "Send your application and start preparing for convoys.",
         reqAge: "Age 12+", reqDiscord: "Discord", reqGame: "ETS2 ownership", reqTMP: "TruckersMP knowledge", reqTB: "Active TrucksBook profile", joinApply: "Apply now", joinDiscord: "Join Discord", joinTmp: "TruckersMP VTC page", joinTb: "TrucksBook company", joinLinksEyebrow: "Official links", joinLinksTitle: "Everything you need to join", joinLinksCopy: "Use these direct links to join the community, check the VTC page, and track the company profile.",
-        modEyebrow: "Meet our modification team", modInline: "Our local moders and save editors !!", modRolePolish: "Local modder", modRoleRollin: "Save editor, local modder", modRolePlumz: "Save editor", modReqEyebrow: "Requirements", modTitle: "Modification Crew", modCopy: "Join our modification team if you can build clean parts, work with Blender, and handle serious save editing.", modReqOne: "Made 3 to 4 mods", modReqTwo: "Knows how to use Blender", modReqThree: "Has the right plugins", modReqFour: "Knows how to make save edits",
-        contactEyebrow: "Open channel", contactTitle: "Stay connected with the fleet.", contactCopy: "Whether you want to apply, follow the convoy, or check member pages, everything important is right here.", contactDiscord: "Discord", contactTb: "TrucksBook", contactTmp: "TruckersMP", signature: "Made by Polishtruckspotter", contactStrong: "We welcome active, respectful drivers who want more than a casual tag. If that sounds like your pace, the fleet is ready.", contactCta: "Start application", contactChipDiscord: "Join Discord for applications and events", contactChipTb: "Check our TrucksBook company page", contactChipTmp: "See our TruckersMP VTC member list", footerNote: "Tab mode active: menu links open sections in new browser tabs."
+        modEyebrow: "Meet our modification team", modInline: "Our local moders and save editors !!", modRolePolish: "Local modder", modReqEyebrow: "Requirements", modTitle: "Modification Crew", modCopy: "Join our modification team if you can build clean parts, work with Blender, and handle serious save editing.", modReqOne: "Made 3 to 4 mods", modReqTwo: "Knows how to use Blender", modReqThree: "Has the right plugins", modReqFour: "Knows how to make save edits",
+        contactEyebrow: "Open channel", contactTitle: "Stay connected with the fleet.", contactCopy: "Whether you want to apply, follow the convoy, or check member pages, everything important is right here.", contactDiscord: "Discord", contactTb: "TrucksBook", contactTmp: "TruckersMP", signature: "Made by Polishtruckspotter", contactStrong: "We welcome active, respectful drivers who want more than a casual tag. If that sounds like your pace, the fleet is ready.", contactCta: "Start application", contactChipDiscord: "Join Discord for applications and events", contactChipTb: "Check our TrucksBook company page", contactChipTmp: "See our TruckersMP VTC member list", footerNote: "Tab mode active: menu links switch sections inside one page.", kmLabel: "All-time TrucksBook km", kmVtcLabel: "ETC km since join", kmLoading: "Loading all-time TrucksBook km...", kmUnavailable: "All-time TrucksBook km unavailable", kmHostedOnly: "Live km works on the hosted site"
       },
       de: {
         brandSubtitle: "ETS2 Virtuelle Spedition", navHome: "Start", navAbout: "Über uns", navJoin: "Mitmachen", navContact: "Kontakt", statusOnline: "VTC Online", languageLabel: "Sprache",
-        heroEyebrow: "Professionelle Konvoi-Einsätze", heroTitle: "Fahr Mit Den Besten", heroSubtitle: "Professionelle virtuelle Spedition für konvoifokussierte Fahrer, cineastische Fahrten und ein aktives Team.", heroPrimary: "Unserer Flotte beitreten", heroSecondary: "Mehr entdecken",
-        homeCardOneTitle: "24/7", homeCardOneText: "Betrieb mit organisierten Konvois, Support und zuverlässiger Routenplanung.", homeCardTwoTitle: "VTC+", homeCardTwoText: "Eine starke Community für Fahrer mit Anspruch an Standards, Spaß und Beständigkeit.", homeCardThreeTitle: "ETS2", homeCardThreeText: "Fokussiert auf Euro Truck Simulator 2 und TruckersMP-Multiplayer-Fahrten.", homeCardFourTitle: "EU", homeCardFourText: "Grenzüberschreitende Konvois mit internationalem Team und cineastischem Event-Stil.",
+        heroEyebrow: "Professionelle Konvoi-Einsätze", heroTitle: "Fahr Mit Den Besten", heroSubtitle: "Eine cineastische ETS2-Spedition für ernste Konvois, sauberen Stil und ein Team, das sich wirklich lebendig anfühlt.", heroPrimary: "Unserer Flotte beitreten", heroSecondary: "Mehr entdecken",
+        microDrivers: "Aktive Fahrer", microDeliveries: "Abgeschlossene Lieferungen", microCountries: "Abgedeckte Länder", visualTitle: "Gebaut für Nachtkonvois", visualText: "Klare Routen, abgestimmte Trucks und ein Teamgefühl, das vom ersten Auftrag an stark wirkt.",
         aboutEyebrow: "Lerne das Team kennen", aboutTitle: "Fahrer, die den Konvoi sauber halten.", aboutCopy: "Wir fahren mit einem kompakten Team voller echter Persönlichkeiten, guter Aktivität und einer starken Konvoi-Identität in Europa.",
         statDeliveriesTitle: "Abgeschlossene Lieferungen", statDeliveriesText: "Solider Fortschritt mit sauberen Fahrten und Konvoi-Disziplin.", statDriversTitle: "Aktive Fahrer", statDriversText: "Ein enges Team mit freundlicher und aktiver Atmosphäre.", statCountriesTitle: "Abgedeckte Länder", statCountriesText: "Routen durch mehrere Regionen mit weiterem Wachstumspotenzial.",
-        rolePolish: "Besitzer", roleOlas: "Fahrer", roleTon: "Bester Fahrer und Recruiter", roleMu: "Fahrer", roleWazar: "Recruiter, Fahrer", roleRollin: "Mitbesitzer",
+        rolePolish: "Besitzer", roleOlas: "Fahrer", roleTon: "Bester Fahrer und Recruiter", roleMu: "Fahrer", roleWazar: "Recruiter, Fahrer",
         joinEyebrow: "Anforderungen", joinTitle: "Komm in unsere Flotte", joinCopy: "Wir suchen aktive und respektvolle Fahrer, die mehr wollen als nur ein lockeres Tag. Wenn das zu dir passt, ist die Flotte bereit.",
         stepOneTitle: "Anforderungen prüfen", stepOneText: "Schau zuerst, ob du die Grundlagen erfüllst.", stepTwoTitle: "Community beitreten", stepTwoText: "Komm in Discord und lerne das Team kennen.", stepThreeTitle: "Bewerben und fahren", stepThreeText: "Sende deine Bewerbung und bereite dich auf Konvois vor.",
-        reqAge: "Alter 12+", reqDiscord: "Discord", reqGame: "ETS2 Besitz", reqTMP: "TruckersMP Kenntnisse", reqTB: "Aktives TrucksBook-Profil", joinApply: "Jetzt bewerben", joinDiscord: "Discord beitreten", joinTmp: "TruckersMP VTC-Seite", joinTb: "TrucksBook Firma", joinLinksEyebrow: "Offizielle Links", joinLinksTitle: "Alles, was du zum Beitreten brauchst", joinLinksCopy: "Nutze diese direkten Links, um der Community beizutreten, die VTC-Seite zu sehen und das Firmenprofil zu prüfen.",
-        modEyebrow: "Unser Modifikationsteam", modInline: "Unsere lokalen Modder und Save-Editoren !!", modRolePolish: "Lokaler Modder", modRoleRollin: "Save-Editor, lokaler Modder", modRolePlumz: "Save-Editor", modReqEyebrow: "Anforderungen", modTitle: "Modifikations-Team", modCopy: "Komm in unser Modifikationsteam, wenn du saubere Teile baust, Blender beherrschst und starke Save-Edits machen kannst.", modReqOne: "3 bis 4 Mods erstellt", modReqTwo: "Kennt Blender", modReqThree: "Hat die richtigen Plugins", modReqFour: "Kann Save-Edits machen",
-        contactEyebrow: "Offener Kanal", contactTitle: "Bleib mit der Flotte verbunden.", contactCopy: "Egal ob Bewerbung, Konvoi oder Mitgliederseiten, alles Wichtige ist direkt hier.", contactDiscord: "Discord", contactTb: "TrucksBook", contactTmp: "TruckersMP", signature: "Gemacht von Polishtruckspotter", contactStrong: "Wir suchen aktive und respektvolle Fahrer, die mehr wollen als nur ein lockeres Tag. Wenn das dein Tempo ist, ist die Flotte bereit.", contactCta: "Bewerbung starten", contactChipDiscord: "Discord für Bewerbungen und Events öffnen", contactChipTb: "Unsere TrucksBook-Firmenseite ansehen", contactChipTmp: "Unsere TruckersMP-VTC-Mitglieder ansehen", footerNote: "Tab-Modus aktiv: Menülinks öffnen Bereiche in neuen Browser-Tabs."
+        reqAge: "Alter 12+", reqDiscord: "Discord", reqGame: "ETS2 Besitz", reqTMP: "TruckersMP Kenntnisse", reqTB: "Aktives TrucksBook-Profil", joinApply: "Jetzt bewerben", joinDiscord: "Discord beitreten", joinTmp: "TruckersMP VTC-Seite", joinTb: "TrucksBook Firma",
+        modEyebrow: "Unser Modifikationsteam", modInline: "Unsere lokalen Modder und Save-Editoren !!", modRolePolish: "Lokaler Modder", modReqEyebrow: "Anforderungen", modTitle: "Modifikations-Team", modCopy: "Komm in unser Modifikationsteam, wenn du saubere Teile baust, Blender beherrschst und starke Save-Edits machen kannst.", modReqOne: "3 bis 4 Mods erstellt", modReqTwo: "Kennt Blender", modReqThree: "Hat die richtigen Plugins", modReqFour: "Kann Save-Edits machen",
+        contactEyebrow: "Offener Kanal", contactTitle: "Bleib mit der Flotte verbunden.", contactCopy: "Egal ob Bewerbung, Konvoi oder Mitgliederseiten, alles Wichtige ist direkt hier.", contactDiscord: "Discord", contactTb: "TrucksBook", contactTmp: "TruckersMP", signature: "Gemacht von Polishtruckspotter", contactStrong: "Wir suchen aktive und respektvolle Fahrer, die mehr wollen als nur ein lockeres Tag. Wenn das dein Tempo ist, ist die Flotte bereit.", contactCta: "Bewerbung starten", contactChipDiscord: "Discord für Bewerbungen und Events öffnen", contactChipTb: "Unsere TrucksBook-Firmenseite ansehen", contactChipTmp: "Unsere TruckersMP-VTC-Mitglieder ansehen", footerNote: "Tab-Modus aktiv: Menülinks öffnen Bereiche in neuen Browser-Tabs.", kmLabel: "Gesamte TrucksBook-km", kmVtcLabel: "ETC-km seit Beitritt", kmLoading: "Gesamte TrucksBook-km werden geladen...", kmUnavailable: "Gesamte TrucksBook-km nicht verfügbar", kmHostedOnly: "Live-km funktionieren auf der gehosteten Seite"
       },
       fr: {
         brandSubtitle: "Entreprise virtuelle de transport ETS2", navHome: "Accueil", navAbout: "À propos", navJoin: "Nous rejoindre", navContact: "Contact", statusOnline: "VTC En ligne", languageLabel: "Langue",
-        heroEyebrow: "Opérations de convoi professionnelles", heroTitle: "Roulez Avec Les Meilleurs", heroSubtitle: "Entreprise virtuelle professionnelle pour les conducteurs orientés convoi, les trajets cinématiques et une équipe active.", heroPrimary: "Rejoindre la flotte", heroSecondary: "Explorer",
-        homeCardOneTitle: "24/7", homeCardOneText: "Des opérations avec convois organisés, support et planification de route fiable.", homeCardTwoTitle: "VTC+", homeCardTwoText: "Une communauté soignée pour les conducteurs attachés aux standards, au fun et à la régularité.", homeCardThreeTitle: "ETS2", homeCardThreeText: "Axé sur Euro Truck Simulator 2 et les trajets multijoueur TruckersMP.", homeCardFourTitle: "EU", homeCardFourText: "Des convois transfrontaliers avec une équipe internationale et un style d'événement cinématique.",
+        heroEyebrow: "Opérations de convoi professionnelles", heroTitle: "Roulez Avec Les Meilleurs", heroSubtitle: "Une entreprise virtuelle ETS2 cinématique pour des convois sérieux, un style propre et une équipe qui a vraiment de la vie.", heroPrimary: "Rejoindre la flotte", heroSecondary: "Explorer",
+        microDrivers: "Conducteurs actifs", microDeliveries: "Livraisons terminées", microCountries: "Pays couverts", visualTitle: "Créé pour les convois de nuit", visualText: "Des trajets propres, des camions soignés et une ambiance d'équipe nette dès le premier trajet.",
         aboutEyebrow: "Rencontrez l'équipe", aboutTitle: "Des conducteurs qui gardent le convoi fluide.", aboutCopy: "Nous roulons avec une petite équipe, de vraies personnalités, une bonne activité et une identité de convoi soignée à travers l'Europe.",
         statDeliveriesTitle: "Livraisons terminées", statDeliveriesText: "Une progression régulière avec des trajets propres et disciplinés.", statDriversTitle: "Conducteurs actifs", statDriversText: "Une équipe soudée avec une ambiance active et agréable.", statCountriesTitle: "Pays couverts", statCountriesText: "Des itinéraires sur plusieurs régions avec encore de la marge pour grandir.",
-        rolePolish: "Propriétaire", roleOlas: "Conducteur", roleTon: "Meilleur conducteur et recruteur", roleMu: "Conducteur", roleWazar: "Recruteur, conducteur", roleRollin: "Co-propriétaire",
+        rolePolish: "Propriétaire", roleOlas: "Conducteur", roleTon: "Meilleur conducteur et recruteur", roleMu: "Conducteur", roleWazar: "Recruteur, conducteur",
         joinEyebrow: "Exigences", joinTitle: "Rejoignez notre flotte", joinCopy: "Nous accueillons des conducteurs actifs et respectueux qui veulent plus qu'un simple tag. Si cela vous ressemble, la flotte vous attend.",
         stepOneTitle: "Vérifier les exigences", stepOneText: "Assurez-vous de remplir les bases avant de postuler.", stepTwoTitle: "Rejoindre la communauté", stepTwoText: "Passez sur Discord et découvrez l'équipe.", stepThreeTitle: "Postuler et rouler", stepThreeText: "Envoyez votre candidature et préparez-vous pour les convois.",
-        reqAge: "Âge 12+", reqDiscord: "Discord", reqGame: "Posséder ETS2", reqTMP: "Connaissance de TruckersMP", reqTB: "Profil TrucksBook actif", joinApply: "Postuler", joinDiscord: "Rejoindre Discord", joinTmp: "Page VTC TruckersMP", joinTb: "Entreprise TrucksBook", joinLinksEyebrow: "Liens officiels", joinLinksTitle: "Tout ce qu'il faut pour nous rejoindre", joinLinksCopy: "Utilisez ces liens directs pour rejoindre la communauté, consulter la page VTC et voir le profil de l'entreprise.",
-        modEyebrow: "Rencontrez notre équipe de modification", modInline: "Nos moddeurs locaux et save editors !!", modRolePolish: "Moddeur local", modRoleRollin: "Save editor, moddeur local", modRolePlumz: "Save editor", modReqEyebrow: "Exigences", modTitle: "Équipe de modification", modCopy: "Rejoignez notre équipe de modification si vous pouvez créer des pièces propres, utiliser Blender et gérer les save edits.", modReqOne: "A créé 3 à 4 mods", modReqTwo: "Sait utiliser Blender", modReqThree: "A les bons plugins", modReqFour: "Sait faire des save edits",
-        contactEyebrow: "Canal ouvert", contactTitle: "Restez connecté avec la flotte.", contactCopy: "Candidatures, convois ou pages membres, tout l'essentiel est ici.", contactDiscord: "Discord", contactTb: "TrucksBook", contactTmp: "TruckersMP", signature: "Créé par Polishtruckspotter", contactStrong: "Nous accueillons des conducteurs actifs et respectueux qui veulent plus qu'un simple tag. Si cela vous correspond, la flotte est prête.", contactCta: "Commencer la candidature", contactChipDiscord: "Rejoindre Discord pour les candidatures et événements", contactChipTb: "Voir notre page entreprise TrucksBook", contactChipTmp: "Voir notre liste de membres TruckersMP", footerNote: "Mode onglet actif : les liens du menu ouvrent les sections dans de nouveaux onglets."
+        reqAge: "Âge 12+", reqDiscord: "Discord", reqGame: "Posséder ETS2", reqTMP: "Connaissance de TruckersMP", reqTB: "Profil TrucksBook actif", joinApply: "Postuler", joinDiscord: "Rejoindre Discord", joinTmp: "Page VTC TruckersMP", joinTb: "Entreprise TrucksBook",
+        modEyebrow: "Rencontrez notre équipe de modification", modInline: "Nos moddeurs locaux et save editors !!", modRolePolish: "Moddeur local", modReqEyebrow: "Exigences", modTitle: "Équipe de modification", modCopy: "Rejoignez notre équipe de modification si vous pouvez créer des pièces propres, utiliser Blender et gérer les save edits.", modReqOne: "A créé 3 à 4 mods", modReqTwo: "Sait utiliser Blender", modReqThree: "A les bons plugins", modReqFour: "Sait faire des save edits",
+        contactEyebrow: "Canal ouvert", contactTitle: "Restez connecté avec la flotte.", contactCopy: "Candidatures, convois ou pages membres, tout l'essentiel est ici.", contactDiscord: "Discord", contactTb: "TrucksBook", contactTmp: "TruckersMP", signature: "Créé par Polishtruckspotter", contactStrong: "Nous accueillons des conducteurs actifs et respectueux qui veulent plus qu'un simple tag. Si cela vous correspond, la flotte est prête.", contactCta: "Commencer la candidature", contactChipDiscord: "Rejoindre Discord pour les candidatures et événements", contactChipTb: "Voir notre page entreprise TrucksBook", contactChipTmp: "Voir notre liste de membres TruckersMP", footerNote: "Mode onglet actif : les liens du menu ouvrent les sections dans de nouveaux onglets.", kmLabel: "Km TrucksBook totaux", kmVtcLabel: "Km ETC depuis l'arrivée", kmLoading: "Chargement des km TrucksBook totaux...", kmUnavailable: "Km TrucksBook totaux indisponibles", kmHostedOnly: "Les km en direct fonctionnent sur le site hébergé"
       },
       pl: {
         brandSubtitle: "Wirtualna Firma Transportowa ETS2", navHome: "Start", navAbout: "O nas", navJoin: "Dołącz", navContact: "Kontakt", statusOnline: "VTC Online", languageLabel: "Język",
-        heroEyebrow: "Profesjonalne operacje konwojowe", heroTitle: "Jedź Z Najlepszymi", heroSubtitle: "Profesjonalna wirtualna firma transportowa dla kierowców konwojowych, kinowych tras i aktywnej ekipy.", heroPrimary: "Dołącz do floty", heroSecondary: "Zobacz więcej",
-        homeCardOneTitle: "24/7", homeCardOneText: "Działanie z organizowanymi konwojami, wsparciem i pewnym planowaniem tras.", homeCardTwoTitle: "VTC+", homeCardTwoText: "Dopracowana społeczność dla kierowców, którzy cenią standardy, fun i regularność.", homeCardThreeTitle: "ETS2", homeCardThreeText: "Skupienie na Euro Truck Simulator 2 i multiplayerowych trasach TruckersMP.", homeCardFourTitle: "EU", homeCardFourText: "Międzynarodowe konwoje w Europie z kinowym stylem wydarzeń.",
+        heroEyebrow: "Profesjonalne operacje konwojowe", heroTitle: "Jedź Z Najlepszymi", heroSubtitle: "Kinowa firma VTC do ETS2 stworzona pod poważne konwoje, dopracowany styl i ekipę, która naprawdę żyje.", heroPrimary: "Dołącz do floty", heroSecondary: "Zobacz więcej",
+        microDrivers: "Aktywni kierowcy", microDeliveries: "Ukończone dostawy", microCountries: "Obsługiwane kraje", visualTitle: "Stworzone pod nocne konwoje", visualText: "Dopracowane trasy, dopieszczone ciężarówki i klimat zespołu, który czuć od pierwszego kursu.",
         aboutEyebrow: "Poznaj ekipę", aboutTitle: "Kierowcy, którzy trzymają konwój w rytmie.", aboutCopy: "Działamy jako mała, konkretna ekipa z charakterem, aktywnością i własnym stylem konwojowym w Europie.",
         statDeliveriesTitle: "Ukończone dostawy", statDeliveriesText: "Stały progres dzięki czystym przejazdom i dyscyplinie konwojowej.", statDriversTitle: "Aktywni kierowcy", statDriversText: "Zgrany zespół, który utrzymuje dobrą i aktywną atmosferę.", statCountriesTitle: "Obsługiwane kraje", statCountriesText: "Trasy przez wiele regionów z miejscem na dalszy rozwój.",
-        rolePolish: "Właściciel", roleOlas: "Kierowca", roleTon: "Najlepszy kierowca i rekruter", roleMu: "Kierowca", roleWazar: "Rekruter, kierowca", roleRollin: "Współwłaściciel",
+        rolePolish: "Właściciel", roleOlas: "Kierowca", roleTon: "Najlepszy kierowca i rekruter", roleMu: "Kierowca", roleWazar: "Rekruter, kierowca",
         joinEyebrow: "Wymagania", joinTitle: "Dołącz do naszej floty", joinCopy: "Szukamy aktywnych i kulturalnych kierowców, którzy chcą czegoś więcej niż zwykły tag. Jeśli to Twój klimat, flota czeka.",
         stepOneTitle: "Sprawdź wymagania", stepOneText: "Upewnij się, że spełniasz podstawy przed zgłoszeniem.", stepTwoTitle: "Dołącz do społeczności", stepTwoText: "Wpadnij na Discord i poznaj ekipę.", stepThreeTitle: "Złóż podanie i ruszaj", stepThreeText: "Wyślij zgłoszenie i przygotuj się na konwoje.",
-        reqAge: "Wiek 12+", reqDiscord: "Discord", reqGame: "Posiadanie ETS2", reqTMP: "Znajomość TruckersMP", reqTB: "Aktywny profil TrucksBook", joinApply: "Aplikuj teraz", joinDiscord: "Dołącz na Discord", joinTmp: "Strona VTC TruckersMP", joinTb: "Firma TrucksBook", joinLinksEyebrow: "Oficjalne linki", joinLinksTitle: "Wszystko, czego potrzebujesz, żeby dołączyć", joinLinksCopy: "Użyj tych bezpośrednich linków, żeby wejść na Discord, sprawdzić stronę VTC i profil firmy.",
-        modEyebrow: "Poznaj nasz zespół modyfikacyjny", modInline: "Nasi lokalni modderzy i save editorzy !!", modRolePolish: "Lokalny modder", modRoleRollin: "Save editor, lokalny modder", modRolePlumz: "Save editor", modReqEyebrow: "Wymagania", modTitle: "Ekipa modyfikacyjna", modCopy: "Dołącz do naszej ekipy modyfikacyjnej, jeśli potrafisz robić czyste części, używasz Blendera i ogarniasz save edity.", modReqOne: "Wykonał 3 do 4 modów", modReqTwo: "Wie jak używać Blendera", modReqThree: "Ma odpowiednie pluginy", modReqFour: "Wie jak robić save edity",
-        contactEyebrow: "Otwarty kanał", contactTitle: "Bądź w kontakcie z flotą.", contactCopy: "Niezależnie czy chcesz aplikować, śledzić konwoje czy sprawdzić strony członków, wszystko jest tutaj.", contactDiscord: "Discord", contactTb: "TrucksBook", contactTmp: "TruckersMP", signature: "Made by Polishtruckspotter", contactStrong: "Szukamy aktywnych i kulturalnych kierowców, którzy chcą czegoś więcej niż zwykły tag. Jeśli to Twoje tempo, flota jest gotowa.", contactCta: "Rozpocznij aplikację", contactChipDiscord: "Dołącz na Discord po aplikacje i wydarzenia", contactChipTb: "Sprawdź naszą firmę na TrucksBook", contactChipTmp: "Zobacz listę członków VTC na TruckersMP", footerNote: "Tryb kart aktywny: linki menu otwierają sekcje w nowych kartach przeglądarki."
+        reqAge: "Wiek 12+", reqDiscord: "Discord", reqGame: "Posiadanie ETS2", reqTMP: "Znajomość TruckersMP", reqTB: "Aktywny profil TrucksBook", joinApply: "Aplikuj teraz", joinDiscord: "Dołącz na Discord", joinTmp: "Strona VTC TruckersMP", joinTb: "Firma TrucksBook",
+        modEyebrow: "Poznaj nasz zespół modyfikacyjny", modInline: "Nasi lokalni modderzy i save editorzy !!", modRolePolish: "Lokalny modder", modReqEyebrow: "Wymagania", modTitle: "Ekipa modyfikacyjna", modCopy: "Dołącz do naszej ekipy modyfikacyjnej, jeśli potrafisz robić czyste części, używasz Blendera i ogarniasz save edity.", modReqOne: "Wykonał 3 do 4 modów", modReqTwo: "Wie jak używać Blendera", modReqThree: "Ma odpowiednie pluginy", modReqFour: "Wie jak robić save edity",
+        contactEyebrow: "Otwarty kanał", contactTitle: "Bądź w kontakcie z flotą.", contactCopy: "Niezależnie czy chcesz aplikować, śledzić konwoje czy sprawdzić strony członków, wszystko jest tutaj.", contactDiscord: "Discord", contactTb: "TrucksBook", contactTmp: "TruckersMP", signature: "Made by Polishtruckspotter", contactStrong: "Szukamy aktywnych i kulturalnych kierowców, którzy chcą czegoś więcej niż zwykły tag. Jeśli to Twoje tempo, flota jest gotowa.", contactCta: "Rozpocznij aplikację", contactChipDiscord: "Dołącz na Discord po aplikacje i wydarzenia", contactChipTb: "Sprawdź naszą firmę na TrucksBook", contactChipTmp: "Zobacz listę członków VTC na TruckersMP", footerNote: "Tryb kart aktywny: linki menu otwierają sekcje w nowych kartach przeglądarki.", kmLabel: "Łączne kilometry TrucksBook", kmVtcLabel: "Kilometry ETC od dołączenia", kmLoading: "Ładowanie łącznych kilometrów TrucksBook...", kmUnavailable: "Łączne kilometry TrucksBook niedostępne", kmHostedOnly: "Live km działa na hostowanej stronie"
       },
       es: {
         brandSubtitle: "Empresa virtual de transporte ETS2", navHome: "Inicio", navAbout: "Sobre nosotros", navJoin: "Únete", navContact: "Contacto", statusOnline: "VTC En línea", languageLabel: "Idioma",
-        heroEyebrow: "Operaciones profesionales de convoy", heroTitle: "Conduce Con Los Mejores", heroSubtitle: "Empresa virtual profesional para conductores centrados en convoyes, rutas cinematográficas y un equipo activo.", heroPrimary: "Únete a la flota", heroSecondary: "Explorar más",
-        homeCardOneTitle: "24/7", homeCardOneText: "Operaciones con convoyes organizados, soporte y planificación fiable de rutas.", homeCardTwoTitle: "VTC+", homeCardTwoText: "Una comunidad cuidada para conductores que valoran estándares, diversión y constancia.", homeCardThreeTitle: "ETS2", homeCardThreeText: "Enfocado en Euro Truck Simulator 2 y viajes multijugador en TruckersMP.", homeCardFourTitle: "EU", homeCardFourText: "Convoyes transfronterizos con un equipo internacional y estilo de evento cinematográfico.",
+        heroEyebrow: "Operaciones profesionales de convoy", heroTitle: "Conduce Con Los Mejores", heroSubtitle: "Una empresa virtual ETS2 cinematográfica hecha para convoyes serios, estilo limpio y un equipo que de verdad se siente vivo.", heroPrimary: "Únete a la flota", heroSecondary: "Explorar más",
+        microDrivers: "Conductores activos", microDeliveries: "Entregas completadas", microCountries: "Países cubiertos", visualTitle: "Hecho para convoyes nocturnos", visualText: "Rutas cuidadas, camiones afinados y un ambiente de equipo que se nota desde el primer viaje.",
         aboutEyebrow: "Conoce al equipo", aboutTitle: "Conductores que mantienen el convoy fluido.", aboutCopy: "Trabajamos con un equipo compacto, personalidades reales, buena actividad e identidad de convoy por toda Europa.",
         statDeliveriesTitle: "Entregas completadas", statDeliveriesText: "Progreso constante con viajes limpios y disciplina de convoy.", statDriversTitle: "Conductores activos", statDriversText: "Un grupo unido que mantiene el ambiente amistoso y activo.", statCountriesTitle: "Países cubiertos", statCountriesText: "Rutas en varias regiones con espacio para seguir creciendo.",
-        rolePolish: "Propietario", roleOlas: "Conductor", roleTon: "Mejor conductor y reclutador", roleMu: "Conductor", roleWazar: "Reclutador, conductor", roleRollin: "Copropietario",
+        rolePolish: "Propietario", roleOlas: "Conductor", roleTon: "Mejor conductor y reclutador", roleMu: "Conductor", roleWazar: "Reclutador, conductor",
         joinEyebrow: "Requisitos", joinTitle: "Únete a nuestra flota", joinCopy: "Damos la bienvenida a conductores activos y respetuosos que buscan algo más que una etiqueta casual. Si ese es tu ritmo, la flota está lista.",
         stepOneTitle: "Revisa requisitos", stepOneText: "Asegúrate de cumplir lo básico antes de aplicar.", stepTwoTitle: "Únete a la comunidad", stepTwoText: "Entra a Discord y conoce al equipo.", stepThreeTitle: "Aplica y conduce", stepThreeText: "Envía tu solicitud y prepárate para los convoyes.",
-        reqAge: "Edad 12+", reqDiscord: "Discord", reqGame: "Tener ETS2", reqTMP: "Conocimiento de TruckersMP", reqTB: "Perfil activo de TrucksBook", joinApply: "Aplicar ahora", joinDiscord: "Unirse a Discord", joinTmp: "Página VTC de TruckersMP", joinTb: "Empresa de TrucksBook", joinLinksEyebrow: "Enlaces oficiales", joinLinksTitle: "Todo lo que necesitas para unirte", joinLinksCopy: "Usa estos enlaces directos para entrar a la comunidad, ver la página VTC y revisar el perfil de la empresa.",
-        modEyebrow: "Conoce a nuestro equipo de modificación", modInline: "Nuestros modders locales y save editors !!", modRolePolish: "Modder local", modRoleRollin: "Save editor, modder local", modRolePlumz: "Save editor", modReqEyebrow: "Requisitos", modTitle: "Equipo de modificación", modCopy: "Únete a nuestro equipo de modificación si puedes hacer piezas limpias, usar Blender y manejar buenos save edits.", modReqOne: "Ha hecho 3 o 4 mods", modReqTwo: "Sabe usar Blender", modReqThree: "Tiene los plugins correctos", modReqFour: "Sabe hacer save edits",
-        contactEyebrow: "Canal abierto", contactTitle: "Sigue conectado con la flota.", contactCopy: "Si quieres aplicar, seguir convoyes o revisar páginas de miembros, todo lo importante está aquí.", contactDiscord: "Discord", contactTb: "TrucksBook", contactTmp: "TruckersMP", signature: "Hecho por Polishtruckspotter", contactStrong: "Damos la bienvenida a conductores activos y respetuosos que buscan algo más que una etiqueta casual. Si ese es tu ritmo, la flota está lista.", contactCta: "Empezar solicitud", contactChipDiscord: "Únete a Discord para solicitudes y eventos", contactChipTb: "Revisa nuestra empresa en TrucksBook", contactChipTmp: "Mira nuestra lista de miembros en TruckersMP", footerNote: "Modo pestaña activo: los enlaces del menú abren secciones en nuevas pestañas."
+        reqAge: "Edad 12+", reqDiscord: "Discord", reqGame: "Tener ETS2", reqTMP: "Conocimiento de TruckersMP", reqTB: "Perfil activo de TrucksBook", joinApply: "Aplicar ahora", joinDiscord: "Unirse a Discord", joinTmp: "Página VTC de TruckersMP", joinTb: "Empresa de TrucksBook",
+        modEyebrow: "Conoce a nuestro equipo de modificación", modInline: "Nuestros modders locales y save editors !!", modRolePolish: "Modder local", modReqEyebrow: "Requisitos", modTitle: "Equipo de modificación", modCopy: "Únete a nuestro equipo de modificación si puedes hacer piezas limpias, usar Blender y manejar buenos save edits.", modReqOne: "Ha hecho 3 o 4 mods", modReqTwo: "Sabe usar Blender", modReqThree: "Tiene los plugins correctos", modReqFour: "Sabe hacer save edits",
+        contactEyebrow: "Canal abierto", contactTitle: "Sigue conectado con la flota.", contactCopy: "Si quieres aplicar, seguir convoyes o revisar páginas de miembros, todo lo importante está aquí.", contactDiscord: "Discord", contactTb: "TrucksBook", contactTmp: "TruckersMP", signature: "Hecho por Polishtruckspotter", contactStrong: "Damos la bienvenida a conductores activos y respetuosos que buscan algo más que una etiqueta casual. Si ese es tu ritmo, la flota está lista.", contactCta: "Empezar solicitud", contactChipDiscord: "Únete a Discord para solicitudes y eventos", contactChipTb: "Revisa nuestra empresa en TrucksBook", contactChipTmp: "Mira nuestra lista de miembros en TruckersMP", footerNote: "Modo pestaña activo: los enlaces del menú abren secciones en nuevas pestañas.", kmLabel: "Km totales de TrucksBook", kmVtcLabel: "Km de ETC desde entrar", kmLoading: "Cargando km totales de TrucksBook...", kmUnavailable: "Km totales de TrucksBook no disponibles", kmHostedOnly: "Los km en vivo funcionan en el sitio alojado"
       },
       nl: {
         brandSubtitle: "ETS2 Virtueel Transportbedrijf", navHome: "Home", navAbout: "Over ons", navJoin: "Word lid", navContact: "Contact", statusOnline: "VTC Online", languageLabel: "Taal",
-        heroEyebrow: "Professionele convoy-operaties", heroTitle: "Rijd Met De Besten", heroSubtitle: "Professioneel virtueel transportbedrijf voor convoygerichte chauffeurs, filmische ritten en een actief team.", heroPrimary: "Word lid van de vloot", heroSecondary: "Ontdek meer",
-        homeCardOneTitle: "24/7", homeCardOneText: "Operaties met georganiseerde convoys, ondersteuning en betrouwbare routeplanning.", homeCardTwoTitle: "VTC+", homeCardTwoText: "Een verzorgde community voor chauffeurs die geven om standaarden, plezier en consistentie.", homeCardThreeTitle: "ETS2", homeCardThreeText: "Gefocust op Euro Truck Simulator 2 en TruckersMP multiplayerritten.", homeCardFourTitle: "EU", homeCardFourText: "Grensoverschrijdende convoys met een internationaal team en een filmische eventstijl.",
+        heroEyebrow: "Professionele convoy-operaties", heroTitle: "Rijd Met De Besten", heroSubtitle: "Een filmische ETS2 VTC gebouwd voor serieuze convoys, strakke stijl en een team dat echt levendig aanvoelt.", heroPrimary: "Word lid van de vloot", heroSecondary: "Ontdek meer",
+        microDrivers: "Actieve chauffeurs", microDeliveries: "Voltooide leveringen", microCountries: "Gedekte landen", visualTitle: "Gemaakt voor nachtconvoys", visualText: "Strakke routes, verzorgde trucks en een teamgevoel dat vanaf de eerste rit goed zit.",
         aboutEyebrow: "Ontmoet het team", aboutTitle: "Topchauffeurs die het konvooi strak houden.", aboutCopy: "We rijden met een compact team, echte persoonlijkheden, goede activiteit en een verzorgde convoy-identiteit door heel Europa.",
         statDeliveriesTitle: "Voltooide leveringen", statDeliveriesText: "Stabiele vooruitgang met nette ritten en convoy-discipline.", statDriversTitle: "Actieve chauffeurs", statDriversText: "Een hecht team dat de sfeer vriendelijk en actief houdt.", statCountriesTitle: "Gedekte landen", statCountriesText: "Routes door meerdere regio's met ruimte om verder te groeien.",
-        rolePolish: "Eigenaar", roleOlas: "Chauffeur", roleTon: "Beste chauffeur en recruiter", roleMu: "Chauffeur", roleWazar: "Recruiter, chauffeur", roleRollin: "Mede-eigenaar",
+        rolePolish: "Eigenaar", roleOlas: "Chauffeur", roleTon: "Beste chauffeur en recruiter", roleMu: "Chauffeur", roleWazar: "Recruiter, chauffeur",
         joinEyebrow: "Vereisten", joinTitle: "Word lid van onze vloot", joinCopy: "We verwelkomen actieve, respectvolle chauffeurs die meer willen dan alleen een casual tag. Als dat bij jou past, staat de vloot klaar.",
         stepOneTitle: "Controleer vereisten", stepOneText: "Zorg dat je aan de basisvoorwaarden voldoet voordat je solliciteert.", stepTwoTitle: "Word deel van de community", stepTwoText: "Kom op Discord en leer het team kennen.", stepThreeTitle: "Solliciteer en rijd", stepThreeText: "Stuur je aanmelding en bereid je voor op convoys.",
-        reqAge: "Leeftijd 12+", reqDiscord: "Discord", reqGame: "Bezitten van ETS2", reqTMP: "TruckersMP kennis", reqTB: "Actief TrucksBook-profiel", joinApply: "Nu solliciteren", joinDiscord: "Word lid van Discord", joinTmp: "TruckersMP VTC-pagina", joinTb: "TrucksBook bedrijf", joinLinksEyebrow: "Officiele links", joinLinksTitle: "Alles wat je nodig hebt om lid te worden", joinLinksCopy: "Gebruik deze directe links om de community te joinen, de VTC-pagina te bekijken en het bedrijfsprofiel te volgen.",
-        modEyebrow: "Ontmoet ons modificatieteam", modInline: "Onze lokale modders en save editors !!", modRolePolish: "Lokale modder", modRoleRollin: "Save editor, lokale modder", modRolePlumz: "Save editor", modReqEyebrow: "Vereisten", modTitle: "Modificatie Crew", modCopy: "Word lid van ons modificatieteam als je nette onderdelen kunt maken, Blender kent en save edits kunt doen.", modReqOne: "Heeft 3 tot 4 mods gemaakt", modReqTwo: "Weet hoe Blender werkt", modReqThree: "Heeft de juiste plugins", modReqFour: "Weet hoe save edits gemaakt worden",
-        contactEyebrow: "Open kanaal", contactTitle: "Blijf verbonden met de vloot.", contactCopy: "Of je nu wilt solliciteren, convoys volgen of ledenpagina's bekijken, alles staat hier klaar.", contactDiscord: "Discord", contactTb: "TrucksBook", contactTmp: "TruckersMP", signature: "Gemaakt door Polishtruckspotter", contactStrong: "We verwelkomen actieve, respectvolle chauffeurs die meer willen dan alleen een casual tag. Als dat jouw tempo is, staat de vloot klaar.", contactCta: "Start sollicitatie", contactChipDiscord: "Ga naar Discord voor sollicitaties en events", contactChipTb: "Bekijk onze TrucksBook-bedrijfspagina", contactChipTmp: "Bekijk onze TruckersMP VTC-ledenlijst", footerNote: "Tabmodus actief: menulinks openen secties in nieuwe browsertabs."
+        reqAge: "Leeftijd 12+", reqDiscord: "Discord", reqGame: "Bezitten van ETS2", reqTMP: "TruckersMP kennis", reqTB: "Actief TrucksBook-profiel", joinApply: "Nu solliciteren", joinDiscord: "Word lid van Discord", joinTmp: "TruckersMP VTC-pagina", joinTb: "TrucksBook bedrijf",
+        modEyebrow: "Ontmoet ons modificatieteam", modInline: "Onze lokale modders en save editors !!", modRolePolish: "Lokale modder", modReqEyebrow: "Vereisten", modTitle: "Modificatie Crew", modCopy: "Word lid van ons modificatieteam als je nette onderdelen kunt maken, Blender kent en save edits kunt doen.", modReqOne: "Heeft 3 tot 4 mods gemaakt", modReqTwo: "Weet hoe Blender werkt", modReqThree: "Heeft de juiste plugins", modReqFour: "Weet hoe save edits gemaakt worden",
+        contactEyebrow: "Open kanaal", contactTitle: "Blijf verbonden met de vloot.", contactCopy: "Of je nu wilt solliciteren, convoys volgen of ledenpagina's bekijken, alles staat hier klaar.", contactDiscord: "Discord", contactTb: "TrucksBook", contactTmp: "TruckersMP", signature: "Gemaakt door Polishtruckspotter", contactStrong: "We verwelkomen actieve, respectvolle chauffeurs die meer willen dan alleen een casual tag. Als dat jouw tempo is, staat de vloot klaar.", contactCta: "Start sollicitatie", contactChipDiscord: "Ga naar Discord voor sollicitaties en events", contactChipTb: "Bekijk onze TrucksBook-bedrijfspagina", contactChipTmp: "Bekijk onze TruckersMP VTC-ledenlijst", footerNote: "Tabmodus actief: menulinks openen secties in nieuwe browsertabs.", kmLabel: "Totale TrucksBook-km", kmVtcLabel: "ETC-km sinds lidmaatschap", kmLoading: "Totale TrucksBook-km laden...", kmUnavailable: "Totale TrucksBook-km niet beschikbaar", kmHostedOnly: "Live-km werken op de gehoste site"
       }
     };
     const availableTabs = ["home", "about", "join", "contact"];
     const defaultLang = "en";
+    let driverKmCache = null;
+    let driverKmFailed = false;
     function getState() {
       const params = new URLSearchParams(window.location.search);
       const lang = translations[params.get("lang")] ? params.get("lang") : (localStorage.getItem("etc-lang") || defaultLang);
@@ -1205,6 +1189,42 @@
       document.querySelectorAll("[data-language-card]").forEach((card) => {
         card.classList.toggle("is-active", card.dataset.languageCard === lang);
       });
+      renderDriverKilometers(lang);
+    }
+    function formatDriverKilometers(value, lang) {
+      const localeMap = { en: "en-GB", de: "de-DE", fr: "fr-FR", pl: "pl-PL", es: "es-ES", nl: "nl-NL" };
+      return new Intl.NumberFormat(localeMap[lang] || "en-GB").format(value);
+    }
+    function renderDriverKilometers(lang) {
+      const dict = translations[lang] || translations[defaultLang];
+      document.querySelectorAll("[data-driver-km]").forEach((node) => {
+        const key = node.dataset.driverKm;
+        const driverData = driverKmCache && driverKmCache[key];
+        node.classList.toggle("is-error", !driverData);
+        if (driverData && Number.isFinite(driverData.value)) {
+          const allTimeLine = `${dict.kmLabel}: ${formatDriverKilometers(driverData.value, lang)} km`;
+          const etcLine = Number.isFinite(driverData.etcValue) ? `${dict.kmVtcLabel}: ${formatDriverKilometers(driverData.etcValue, lang)} km` : "";
+          node.innerHTML = etcLine ? `${allTimeLine}<br>${etcLine}` : allTimeLine;
+          node.title = driverData.profileUrl || node.dataset.profileUrl || "";
+          return;
+        }
+        node.textContent = window.location.protocol === "file:" ? dict.kmHostedOnly : (driverKmFailed ? dict.kmUnavailable : dict.kmLoading);
+        node.title = node.dataset.profileUrl || "";
+      });
+    }
+    async function loadDriverKilometers(lang) {
+      renderDriverKilometers(lang);
+      try {
+        const response = await fetch("./api/trucksbook-km");
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const payload = await response.json();
+        driverKmCache = payload.drivers || {};
+        driverKmFailed = false;
+      } catch (error) {
+        driverKmCache = null;
+        driverKmFailed = true;
+      }
+      renderDriverKilometers(lang);
     }
     function showLanguageOverlay() {
       const overlay = document.getElementById("language-overlay");
@@ -1246,18 +1266,14 @@
           switchTab(link.dataset.tab, state.lang);
         });
       });
-      document.getElementById("brand-link").addEventListener("click", (event) => {
-        event.preventDefault();
-        const state = getState();
-        switchTab("home", state.lang);
-      });
-      document.querySelectorAll("[data-tab-action]").forEach((link) => {
-        link.addEventListener("click", (event) => {
+      const brandLink = document.getElementById("brand-link");
+      if (brandLink) {
+        brandLink.addEventListener("click", (event) => {
           event.preventDefault();
           const state = getState();
-          switchTab(link.dataset.tabAction, state.lang);
+          switchTab("home", state.lang);
         });
-      });
+      }
     }
     function bindLanguageOverlay() {
       const trigger = document.getElementById("language-trigger");
@@ -1296,6 +1312,7 @@
       initParticles();
       const { lang, tab } = getState();
       applyLanguage(lang);
+      loadDriverKilometers(lang);
       showPanel(tab);
       refreshLinks(lang, tab);
       bindTabNavigation();

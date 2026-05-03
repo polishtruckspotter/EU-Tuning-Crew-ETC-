@@ -1,0 +1,309 @@
+<div class="profile-info">
+
+    
+
+
+    <div class="profile-info-item">
+        <span class="far fa-arrows-left-right fa-fw"></span>
+        Distance
+        <span class="float-end">
+            4 080            km            <a data-bs-toggle="modal" class="ms-1" data-bs-target="#ChartModal1-distance" href="#graph1-distance"><i class="fas fa-chart-line" title="Distance progress"></i></a>
+        </span>
+    </div>
+    <div class="profile-info-item">
+        <span class="far fa-truck-loading fa-fw"></span>
+        Delivery count
+        <span class="float-end">
+            6            <a data-bs-toggle="modal" class="ms-1" data-bs-target="#ChartModal1-count" href="#graph1-count"><i class="fas fa-chart-line" title="Delivery count progress"></i></a>
+        </span>
+    </div>
+
+    
+</div>
+
+
+<div id="ChartModal1-distance" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Distance progress - ETS2 -
+                    Total                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <div class="form-group">
+                    <label for="select_1_distance">Period</label>
+                    <select class="form-select select-chart-period-distance" data-chart="1_chart_distance" data-src="/user-game-overview-data/570956?game=1&stat=0&data=distance&period=" id="select_1_distance">
+                        <option value="last12">Last 12 months</option>
+                                                    <option value="2026">2026</option>
+                                                    <option value="2025">2025</option>
+                                                    <option value="2024">2024</option>
+                                                    <option value="2023">2023</option>
+                                                    <option value="2022">2022</option>
+                                                    <option value="2021">2021</option>
+                                                    <option value="2020">2020</option>
+                                                    <option value="2019">2019</option>
+                                                    <option value="2018">2018</option>
+                                                    <option value="2017">2017</option>
+                                                    <option value="2016">2016</option>
+                        
+                    </select>
+                </div>
+
+                
+                <canvas id="1_chart_distance" width="400" height="400"></canvas>
+                <script>
+                    (() => {
+                        const distance_string = "displayed user";
+                        const count_string = "my progress";
+                        const ctx = document.getElementById("1_chart_distance");
+                        const skipped = (ctx, value) => ctx.p0.skip || ctx.p1.skip ? value : undefined;
+                        let myChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: [],
+                                datasets: [
+                                                                        {
+                                        label: count_string,
+                                        data: [],
+
+                                        borderColor: [
+                                            'rgba(25,125,0,1)',
+                                        ],
+                                        backgroundColor: 'rgba(25,125,0,0.8)',
+                                        borderWidth: 3,
+                                        fill: false,
+                                        pointRadius: 5,
+                                        pointHoverRadius: 8,
+                                        segment: {
+                                            borderColor: ctx => skipped(ctx, 'rgb(0,0,0,0.2)'),
+                                            borderDash: ctx => skipped(ctx, [6, 6]),
+                                        }
+                                    }]
+                            },
+                            options: {
+                                spanGaps: true,
+                                layout: {
+                                    padding: {
+                                        top: 10,
+                                        bottom: 10
+                                    }
+                                },
+
+                                animation: false,
+
+                                scales: {
+                                    x:{
+                                        ticks:{
+                                                                                    }
+                                    },
+                                    y: {
+
+                                        reverse: false,
+                                        beginAtZero: true,
+                                        ticks: {
+                                            // forces step size to be 50 units
+                                            stepSize: 1000,
+                                                                                    },
+                                        min: 0,
+
+
+                                    }
+                                },
+                                plugins: {
+                                    tooltip: {
+                                        backgroundColor: 'rgba(0,0,0,0.8)',
+                                        titleColor: '#fff',
+                                        bodyColor: '#fff',
+                                        boxPadding: 5,
+                                        borderColor: 'rgba(46,109,164,0.8)',
+                                        borderWidth: 2
+                                    },
+                                    legend: {
+                                        labels:{
+                                                                                    }
+                                    }
+                                }
+                            }
+                        });
+
+                        const chartModal = document.getElementById("ChartModal1-distance");
+                        chartModal.addEventListener('show.bs.modal', function () {
+                            const select = chartModal.querySelector(".select-chart-period-distance");
+                            select.dispatchEvent(new Event('change'));
+                        });
+
+                        const select = document.getElementById("select_1_distance");
+                        select.addEventListener('change', () => {
+
+                            fetch(select.dataset.src + select.value)
+                                .then(response => response.json())
+                                .then(data => {
+
+                                    myChart.data.labels = data.labels;
+                                    myChart.data.datasets[0].data = data.values.selected_user;
+                                    if(myChart.data.datasets[1]) myChart.data.datasets[1].data = data.values.me;
+                                    myChart.update();
+
+                                });
+
+                        });
+
+
+                    })();
+
+                </script>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+                <div id="ChartModal1-count" class="modal fade" role="dialog">
+                    <div class="modal-dialog">
+
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    Delivery count progress - ETS2 -
+                                    Total                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+
+                                <div class="form-group">
+                                    <label for="select_1_count">Period</label>
+                                    <select class="form-select select-chart-period-count" data-chart="1_chart_count" data-src="/user-game-overview-data/570956?game=1&stat=0&data=count&period=" id="select_1_count">
+                                        <option value="last12">Last 12 months</option>
+                                                                                    <option value="2026">2026</option>
+                                                                                    <option value="2025">2025</option>
+                                                                                    <option value="2024">2024</option>
+                                                                                    <option value="2023">2023</option>
+                                                                                    <option value="2022">2022</option>
+                                                                                    <option value="2021">2021</option>
+                                                                                    <option value="2020">2020</option>
+                                                                                    <option value="2019">2019</option>
+                                                                                    <option value="2018">2018</option>
+                                                                                    <option value="2017">2017</option>
+                                                                                    <option value="2016">2016</option>
+                                        
+                                    </select>
+                                </div>
+
+                                
+                                <canvas id="1_chart_count" width="400" height="400"></canvas>
+                                <script>
+                                    (() => {
+                                        const distance_string = "displayed user";
+                                        const count_string = "my progress";
+                                        const ctx = document.getElementById("1_chart_count");
+                                        const skipped = (ctx, value) => ctx.p0.skip || ctx.p1.skip ? value : undefined;
+                                        let myChart = new Chart(ctx, {
+                                            type: 'line',
+                                            data: {
+                                                labels: [],
+                                                datasets: [
+                                                                                                        {
+                                                        label: count_string,
+                                                        data: [],
+
+                                                        borderColor: [
+                                                            'rgba(25,125,0,1)',
+                                                        ],
+                                                        backgroundColor: 'rgba(25,125,0,0.8)',
+                                                        borderWidth: 3,
+                                                        fill: false,
+                                                        pointRadius: 5,
+                                                        pointHoverRadius: 8,
+                                                        segment: {
+                                                            borderColor: ctx => skipped(ctx, 'rgb(0,0,0,0.2)'),
+                                                            borderDash: ctx => skipped(ctx, [6, 6]),
+                                                        }
+                                                    }]
+                                            },
+                                            options: {
+                                                spanGaps: true,
+                                                layout: {
+                                                    padding: {
+                                                        top: 10,
+                                                        bottom: 10
+                                                    }
+                                                },
+
+                                                animation: false,
+
+                                                scales: {
+                                                    x:{
+                                                        ticks:{
+                                                                                                                    }
+                                                    },
+                                                    y: {
+
+                                                        reverse: false,
+                                                        beginAtZero: true,
+                                                        ticks: {
+                                                            // forces step size to be 50 units
+                                                            stepSize: 1000,
+                                                                                                                    },
+                                                        min: 0,
+
+
+                                                    }
+                                                },
+                                                plugins: {
+                                                    tooltip: {
+                                                        backgroundColor: 'rgba(0,0,0,0.8)',
+                                                        titleColor: '#fff',
+                                                        bodyColor: '#fff',
+                                                        boxPadding: 5,
+                                                        borderColor: 'rgba(46,109,164,0.8)',
+                                                        borderWidth: 2
+                                                    },
+                                                    legend: {
+                                                        labels:{
+                                                                                                                    }
+                                                    }
+                                                }
+                                            }
+                                        });
+
+                                        const chartModal = document.getElementById("ChartModal1-count");
+                                        chartModal.addEventListener('show.bs.modal', function () {
+                                            const select = chartModal.querySelector(".select-chart-period-count");
+                                            select.dispatchEvent(new Event('change'));
+                                        });
+
+                                        const select = document.getElementById("select_1_count");
+                                        select.addEventListener('change', () => {
+
+                                            fetch(select.dataset.src + select.value)
+                                                .then(response => response.json())
+                                                .then(data => {
+
+                                                    myChart.data.labels = data.labels;
+                                                    myChart.data.datasets[0].data = data.values.selected_user;
+                                                    if(myChart.data.datasets[1]) myChart.data.datasets[1].data = data.values.me;
+                                                    myChart.update();
+
+                                                });
+
+                                        });
+
+
+                                    })();
+
+                                </script>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+

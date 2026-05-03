@@ -1,0 +1,8 @@
+{
+  "name": "eu-tuning-crew-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs"
+  }
+}
