@@ -1,0 +1,88 @@
+(node:24492) DeprecationWarning: The ready event has been renamed to clientReady to distinguish it from the gateway READY event and will only emit under that name in v15. Please use clientReady instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:24492) Warning: Supplying "ephemeral" for interaction response options is deprecated. Utilize flags instead.
+Failed to rename ticket channel DiscordAPIError[10003]: Unknown Channel
+    at handleErrors (C:\EU Tuning Crew ETC\bot\node_modules\@discordjs\rest\dist\index.js:762:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async SequentialHandler.runRequest (C:\EU Tuning Crew ETC\bot\node_modules\@discordjs\rest\dist\index.js:1163:23)
+    at async SequentialHandler.queueRequest (C:\EU Tuning Crew ETC\bot\node_modules\@discordjs\rest\dist\index.js:994:14)
+    at async _REST.request (C:\EU Tuning Crew ETC\bot\node_modules\@discordjs\rest\dist\index.js:1307:22)
+    at async ChannelManager.fetch (C:\EU Tuning Crew ETC\bot\node_modules\discord.js\src\managers\ChannelManager.js:130:18)
+    at async updateTicketChannelName (file:///C:/EU%20Tuning%20Crew%20ETC/bot/src/index.js:365:21)
+    at async openTicketForUser (file:///C:/EU%20Tuning%20Crew%20ETC/bot/src/index.js:416:5)
+    at async Client.<anonymous> (file:///C:/EU%20Tuning%20Crew%20ETC/bot/src/index.js:1596:20) {
+  requestBody: { files: undefined, json: undefined },
+  rawError: { message: 'Unknown Channel', code: 10003 },
+  code: 10003,
+  status: 404,
+  method: 'GET',
+  url: 'https://discord.com/api/v10/channels/1508801827825516605'
+}
+Failed to rename ticket channel DiscordAPIError[10003]: Unknown Channel
+    at handleErrors (C:\EU Tuning Crew ETC\bot\node_modules\@discordjs\rest\dist\index.js:762:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async SequentialHandler.runRequest (C:\EU Tuning Crew ETC\bot\node_modules\@discordjs\rest\dist\index.js:1163:23)
+    at async SequentialHandler.queueRequest (C:\EU Tuning Crew ETC\bot\node_modules\@discordjs\rest\dist\index.js:994:14)
+    at async _REST.request (C:\EU Tuning Crew ETC\bot\node_modules\@discordjs\rest\dist\index.js:1307:22)
+    at async ChannelManager.fetch (C:\EU Tuning Crew ETC\bot\node_modules\discord.js\src\managers\ChannelManager.js:130:18)
+    at async updateTicketChannelName (file:///C:/EU%20Tuning%20Crew%20ETC/bot/src/index.js:365:21)
+    at async closeTicket (file:///C:/EU%20Tuning%20Crew%20ETC/bot/src/index.js:478:3)
+    at async Client.<anonymous> (file:///C:/EU%20Tuning%20Crew%20ETC/bot/src/index.js:1611:5) {
+  requestBody: { files: undefined, json: undefined },
+  rawError: { message: 'Unknown Channel', code: 10003 },
+  code: 10003,
+  status: 404,
+  method: 'GET',
+  url: 'https://discord.com/api/v10/channels/1508801827825516605'
+}
+Failed to rename ticket channel DiscordAPIError[10003]: Unknown Channel
+    at handleErrors (C:\EU Tuning Crew ETC\bot\node_modules\@discordjs\rest\dist\index.js:762:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async SequentialHandler.runRequest (C:\EU Tuning Crew ETC\bot\node_modules\@discordjs\rest\dist\index.js:1163:23)
+    at async SequentialHandler.queueRequest (C:\EU Tuning Crew ETC\bot\node_modules\@discordjs\rest\dist\index.js:994:14)
+    at async _REST.request (C:\EU Tuning Crew ETC\bot\node_modules\@discordjs\rest\dist\index.js:1307:22)
+    at async ChannelManager.fetch (C:\EU Tuning Crew ETC\bot\node_modules\discord.js\src\managers\ChannelManager.js:130:18)
+    at async updateTicketChannelName (file:///C:/EU%20Tuning%20Crew%20ETC/bot/src/index.js:365:21)
+    at async openTicketForUser (file:///C:/EU%20Tuning%20Crew%20ETC/bot/src/index.js:416:5)
+    at async Client.<anonymous> (file:///C:/EU%20Tuning%20Crew%20ETC/bot/src/index.js:1596:20) {
+  requestBody: { files: undefined, json: undefined },
+  rawError: { message: 'Unknown Channel', code: 10003 },
+  code: 10003,
+  status: 404,
+  method: 'GET',
+  url: 'https://discord.com/api/v10/channels/1508801827825516605'
+}
+Failed to rename ticket channel DiscordAPIError[10003]: Unknown Channel
+    at handleErrors (C:\EU Tuning Crew ETC\bot\node_modules\@discordjs\rest\dist\index.js:762:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async SequentialHandler.runRequest (C:\EU Tuning Crew ETC\bot\node_modules\@discordjs\rest\dist\index.js:1163:23)
+    at async SequentialHandler.queueRequest (C:\EU Tuning Crew ETC\bot\node_modules\@discordjs\rest\dist\index.js:994:14)
+    at async _REST.request (C:\EU Tuning Crew ETC\bot\node_modules\@discordjs\rest\dist\index.js:1307:22)
+    at async ChannelManager.fetch (C:\EU Tuning Crew ETC\bot\node_modules\discord.js\src\managers\ChannelManager.js:130:18)
+    at async updateTicketChannelName (file:///C:/EU%20Tuning%20Crew%20ETC/bot/src/index.js:365:21)
+    at async closeTicket (file:///C:/EU%20Tuning%20Crew%20ETC/bot/src/index.js:478:3)
+    at async Client.<anonymous> (file:///C:/EU%20Tuning%20Crew%20ETC/bot/src/index.js:1611:5) {
+  requestBody: { files: undefined, json: undefined },
+  rawError: { message: 'Unknown Channel', code: 10003 },
+  code: 10003,
+  status: 404,
+  method: 'GET',
+  url: 'https://discord.com/api/v10/channels/1508801827825516605'
+}
+Failed to rename ticket channel DiscordAPIError[10003]: Unknown Channel
+    at handleErrors (C:\EU Tuning Crew ETC\bot\node_modules\@discordjs\rest\dist\index.js:762:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async SequentialHandler.runRequest (C:\EU Tuning Crew ETC\bot\node_modules\@discordjs\rest\dist\index.js:1163:23)
+    at async SequentialHandler.queueRequest (C:\EU Tuning Crew ETC\bot\node_modules\@discordjs\rest\dist\index.js:994:14)
+    at async _REST.request (C:\EU Tuning Crew ETC\bot\node_modules\@discordjs\rest\dist\index.js:1307:22)
+    at async ChannelManager.fetch (C:\EU Tuning Crew ETC\bot\node_modules\discord.js\src\managers\ChannelManager.js:130:18)
+    at async updateTicketChannelName (file:///C:/EU%20Tuning%20Crew%20ETC/bot/src/index.js:365:21)
+    at async openTicketForUser (file:///C:/EU%20Tuning%20Crew%20ETC/bot/src/index.js:416:5)
+    at async Client.<anonymous> (file:///C:/EU%20Tuning%20Crew%20ETC/bot/src/index.js:1596:20) {
+  requestBody: { files: undefined, json: undefined },
+  rawError: { message: 'Unknown Channel', code: 10003 },
+  code: 10003,
+  status: 404,
+  method: 'GET',
+  url: 'https://discord.com/api/v10/channels/1508801827825516605'
+}
