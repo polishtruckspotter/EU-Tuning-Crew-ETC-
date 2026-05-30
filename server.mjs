@@ -101,3 +101,5 @@ const server = createServer(async (req, res) => {
 server.listen(port, () => {
   console.log(`EU Tuning Crew local server running at http://localhost:${port}`);
 });
+// Start the bot backend automatically alongside the website server
+import("./bot/src/index.js").catch(err => console.error("Failed to start bot:", err));
