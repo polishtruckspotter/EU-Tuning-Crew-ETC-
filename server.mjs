@@ -1,6 +1,6 @@
 import { createReadStream, existsSync } from "node:fs";
 import { stat } from "node:fs/promises";
-import { createServer } from "node:http";
+import http, { createServer } from "node:http";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import handler from "./api/trucksbook-km.js";
@@ -54,18 +54,13 @@ async function serveStatic(req, res, pathname) {
   const safePath = normalize(requestedPath).replace(/^(\.\.[/\\])+/, "");
   const filePath = join(rootDir, safePath);
 
-  // 🔍 DEBUG CHECK: This prints to Render logs to find exactly what is missing
-  console.log("DEBUG PATH CHECK:", filePath, "| Exists on disk:", existsSync(filePath));
-
   if (!filePath.startsWith(rootDir) || !existsSync(filePath)) {
-    sendJson(res, 404, { error: "Not found" });
-    return;
+    return false;
   }
 
   const fileStats = await stat(filePath);
   if (!fileStats.isFile()) {
-    sendJson(res, 404, { error: "Not found" });
-    return;
+    return false;
   }
 
   const ext = extname(filePath).toLowerCase();
@@ -74,6 +69,7 @@ async function serveStatic(req, res, pathname) {
     "Content-Length": fileStats.size
   });
   createReadStream(filePath).pipe(res);
+  return true;
 }
 
 const server = createServer(async (req, res) => {
@@ -91,7 +87,28 @@ const server = createServer(async (req, res) => {
       return;
     }
 
-    await serveStatic(req, res, url.pathname);
+    // Try serving main website files first
+    const fileFound = await serveStatic(req, res, url.pathname);
+    
+    // 🌐 BRIDGE: If file doesn't exist on the website, safely forward the request to the Bot Panel on 10001!
+    if (!fileFound) {
+      const proxyReq = http.request({
+        host: "localhost",
+        port: 10001,
+        path: req.url,
+        method: req.method,
+        headers: req.headers
+      }, (proxyRes) => {
+        res.writeHead(proxyRes.statusCode, proxyRes.headers);
+        proxyRes.pipe(res);
+      });
+
+      proxyReq.on("error", () => {
+        sendJson(res, 404, { error: "Page not found on website or bot panel." });
+      });
+
+      req.pipe(proxyReq);
+    }
   } catch (error) {
     sendJson(res, 500, {
       error: "Local server failed to handle the request.",
@@ -104,9 +121,7 @@ server.listen(port, () => {
   console.log(`EU Tuning Crew local server running at http://localhost:${port}`);
 });
 
-// Start the bot backend automatically alongside the website server
-import("./bot/src/index.js").catch(err => console.error("Failed to start bot:", err));
-// Change the port variable temporarily so the bot doesn't clash with the website layout
+// Set port to 10001 internally so the bot panel binds there
 process.env.PORT = "10001";
 
 // Start the bot backend automatically alongside the website server
