@@ -54,26 +54,8 @@ async function serveStatic(req, res, pathname) {
   const safePath = normalize(requestedPath).replace(/^(\.\.[/\\])+/, "");
   const filePath = join(rootDir, safePath);
 
-  if (!filePath.startsWith(rootDir) || !existsSync(filePath)) {
-    sendJson(res, 404, { error: "Not found" });
-    return;
-  }
-
-  const fileStats = await stat(filePath);
-  if (!fileStats.isFile()) {
-    sendJson(res, 404, { error: "Not found" });
-    return;
-  }
-
-  const ext = extname(filePath).toLowerCase();
-  res.writeHead(200, {
-    "Content-Type": contentTypes[ext] || "application/octet-stream",
-    "Content-Length": fileStats.size
-  });
-  createReadStream(filePath).pipe(res);
-}
-
-
+  // 🔍 DEBUG CHECK: This prints to Render logs to find exactly what is missing
+  console.log("DEBUG PATH CHECK:", filePath, "| Exists on disk:", existsSync(filePath));
 
   if (!filePath.startsWith(rootDir) || !existsSync(filePath)) {
     sendJson(res, 404, { error: "Not found" });
@@ -109,7 +91,6 @@ const server = createServer(async (req, res) => {
       return;
     }
 
-
     await serveStatic(req, res, url.pathname);
   } catch (error) {
     sendJson(res, 500, {
@@ -122,5 +103,6 @@ const server = createServer(async (req, res) => {
 server.listen(port, () => {
   console.log(`EU Tuning Crew local server running at http://localhost:${port}`);
 });
+
 // Start the bot backend automatically alongside the website server
 import("./bot/src/index.js").catch(err => console.error("Failed to start bot:", err));
