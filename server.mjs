@@ -92,7 +92,7 @@ async function serveStatic(req, res, pathname) {
     "Content-Length": fileStats.size
   });
   createReadStream(filePath).pipe(res);
-
+}
 
 const server = createServer(async (req, res) => {
   try {
