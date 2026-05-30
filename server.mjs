@@ -106,3 +106,8 @@ server.listen(port, () => {
 
 // Start the bot backend automatically alongside the website server
 import("./bot/src/index.js").catch(err => console.error("Failed to start bot:", err));
+// Change the port variable temporarily so the bot doesn't clash with the website layout
+process.env.PORT = "10001";
+
+// Start the bot backend automatically alongside the website server
+import("./bot/src/index.js").catch(err => console.error("Failed to start bot:", err));
