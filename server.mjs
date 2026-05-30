@@ -82,6 +82,13 @@ const server = createServer(async (req, res) => {
       return;
     }
 
+    if (url.pathname === "/api/welcome-preview") {
+      const { default: welcomePreview } = await import("./api/welcome-preview.js");
+      await welcomePreview(req, createApiResponse(res));
+      return;
+    }
+
+
     await serveStatic(req, res, url.pathname);
   } catch (error) {
     sendJson(res, 500, {

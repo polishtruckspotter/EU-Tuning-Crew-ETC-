@@ -162,6 +162,7 @@
     }
     .nav-link:hover::after,
     .nav-link.is-active::after { transform: scaleX(1); }
+    .bot-panel-link { display: inline-flex; }
     .status-pill {
       position: relative;
       display: inline-flex;
@@ -281,6 +282,139 @@
       font-family: "Manrope", sans-serif;
       font-size: 1rem;
       color: rgba(255, 255, 255, 0.9);
+    }
+    .site-login-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      background: rgba(6, 7, 10, 0.88);
+      backdrop-filter: blur(16px);
+    }
+    .site-login-overlay.is-hidden { display: none; }
+    .site-login-modal {
+      width: min(100%, 1120px);
+      padding: 38px;
+      border-radius: 34px;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      background:
+        radial-gradient(circle at top right, rgba(31, 242, 210, 0.13), transparent 30%),
+        linear-gradient(180deg, rgba(17, 18, 24, 0.96), rgba(10, 10, 15, 0.98));
+      box-shadow: 0 34px 100px rgba(0, 0, 0, 0.55);
+    }
+    .site-login-title {
+      margin: 0 0 10px;
+      font-family: "Anton", sans-serif;
+      font-size: clamp(2.8rem, 7vw, 5.8rem);
+      line-height: 0.92;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    .site-login-copy {
+      margin: 0 0 26px;
+      max-width: 46rem;
+      color: rgba(255, 255, 255, 0.76);
+      font-family: "Manrope", sans-serif;
+      font-size: 1.05rem;
+      line-height: 1.5;
+    }
+    .site-role-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+    .site-role-card {
+      min-height: 138px;
+      padding: 22px;
+      border-radius: 26px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.035);
+      color: var(--text);
+      cursor: pointer;
+      transition: 0.2s ease;
+      text-align: center;
+    }
+    .site-role-card:hover,
+    .site-role-card.is-active {
+      transform: translateY(-4px);
+      border-color: rgba(31, 242, 210, 0.75);
+      box-shadow: 0 0 26px rgba(31, 242, 210, 0.12);
+    }
+    .site-role-name {
+      display: block;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .site-role-label {
+      display: block;
+      margin-top: 10px;
+      color: rgba(255, 255, 255, 0.62);
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+    .site-password-wrap {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .site-password-wrap.is-hidden { display: none; }
+    .site-password-wrap label {
+      font-family: "Rajdhani", sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .site-password-wrap input {
+      min-height: 54px;
+      padding: 0 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      background: rgba(255, 255, 255, 0.035);
+      color: #fff;
+      font-family: "Manrope", sans-serif;
+      font-size: 1rem;
+    }
+    .site-login-error {
+      display: none;
+      margin: 0 0 16px;
+      color: #ff8a8a;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.9rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .site-login-error.is-visible { display: block; }
+    .site-login-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .site-remember {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 18px;
+      color: rgba(255, 255, 255, 0.72);
+      font-family: "Manrope", sans-serif;
+      font-size: 0.96rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .site-remember input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
     }
     .language-trigger {
       display: inline-flex;
@@ -899,11 +1033,49 @@
         min-height: 128px;
         border-radius: 22px;
       }
+      .site-login-modal { padding: 26px; border-radius: 28px; }
+      .site-role-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="particles" aria-hidden="true" id="particles"></div>
+  <div class="site-login-overlay" id="site-login-overlay" aria-hidden="false">
+    <div class="site-login-modal">
+      <h2 class="site-login-title">ETC LOGIN</h2>
+      <p class="site-login-copy">Continue as a guest, or login as an owner or admin to open the bot panel.</p>
+      <form id="site-login-form">
+        <input type="hidden" name="siteRole" id="site-role-input" value="guest">
+        <input type="hidden" name="role" id="panel-role-input" value="guest">
+        <div class="site-role-grid">
+          <button class="site-role-card is-active" type="button" data-site-role="guest">
+            <span class="site-role-name">Continue as guest</span>
+            <span class="site-role-label">Public entrance</span>
+          </button>
+          <button class="site-role-card" type="button" data-site-role="admin">
+            <span class="site-role-name">Login as admin</span>
+            <span class="site-role-label">Enter admin code</span>
+          </button>
+          <button class="site-role-card" type="button" data-site-role="owner">
+            <span class="site-role-name">Login as owner</span>
+            <span class="site-role-label">Enter owner code</span>
+          </button>
+        </div>
+        <div class="site-password-wrap is-hidden" id="site-password-wrap">
+          <label for="site-password" id="site-password-label">Admin code</label>
+          <input id="site-password" name="password" type="password" autocomplete="current-password">
+        </div>
+        <p class="site-login-error" id="site-login-error">Wrong code.</p>
+        <label class="site-remember" for="site-remember">
+          <input id="site-remember" type="checkbox">
+          <span>Remember me</span>
+        </label>
+        <div class="site-login-actions">
+          <button class="button button-primary" type="submit" id="site-login-submit">Continue as guest</button>
+        </div>
+      </form>
+    </div>
+  </div>
   <div class="language-overlay" id="language-overlay" aria-hidden="true">
     <div class="language-modal">
       <h2 class="language-overlay-title">SELECT LANGUAGE</h2>
@@ -934,6 +1106,7 @@
         <a class="nav-link" data-tab-link data-tab="about" href="./index.html?tab=about&lang=en" data-i18n="navAbout">About Us</a>
         <a class="nav-link" data-tab-link data-tab="join" href="./index.html?tab=join&lang=en" data-i18n="navJoin">Join Us</a>
         <a class="nav-link" data-tab-link data-tab="contact" href="./index.html?tab=contact&lang=en" data-i18n="navContact">Contact</a>
+        <a class="nav-link bot-panel-link" id="bot-panel-link" href="/login">BOT PANEL</a>
       </nav>
       <div class="status-pill">
         <span class="status-dot" aria-hidden="true"></span>
@@ -1054,7 +1227,36 @@
           <div class="eyebrow" data-i18n="contactEyebrow">Open channel</div>
           <h2 class="section-title" data-i18n="contactTitle">Stay connected with the fleet.</h2>
           <p class="section-copy" data-i18n="contactCopy">Whether you want to apply, follow the convoy, or check member pages, everything important is right here.</p>
+
+          <div style="margin: 22px 0 12px;">
+            <div class="eyebrow" style="margin-bottom: 12px;">Welcome message preview</div>
+            <div class="contact-buttons" style="justify-content:flex-start;">
+              <button class="contact-button" type="button" data-open-welcome-preview="server">Server Welcome</button>
+              <button class="contact-button" type="button" data-open-welcome-preview="dm">DM Welcome</button>
+            </div>
+          </div>
+
+          <div class="language-overlay" id="welcome-preview-overlay" aria-hidden="true">
+            <div class="language-modal">
+              <h2 class="language-overlay-title" style="font-size: clamp(2.3rem, 6vw, 4.6rem); margin-bottom: 10px;">WELCOME PREVIEW</h2>
+              <p class="language-overlay-copy" id="welcome-preview-subtitle">Loading…</p>
+              <div class="preview-shell" style="border-radius: 18px; border: 1px solid rgba(255,255,255,0.10); overflow:hidden; background: rgba(6, 9, 17, 0.76);">
+                <div class="preview-body" style="padding: 18px;">
+                  <div id="welcome-preview-card" style="display:grid; gap: 10px;">
+                    <div id="welcome-preview-title" style="font-family: 'Space Grotesk', sans-serif; font-weight:800; font-size: 1.35rem;">—</div>
+                    <div id="welcome-preview-desc" style="white-space: pre-wrap; color: rgba(226, 232, 255, 0.72); line-height: 1.5;">—</div>
+                    <img id="welcome-preview-image" src="" alt="welcome image" style="display:none; border-radius: 12px;" />
+                  </div>
+                </div>
+              </div>
+              <div class="buttons" style="margin-top: 18px;">
+                <button class="button button-secondary" type="button" id="welcome-preview-close">Close</button>
+              </div>
+            </div>
+          </div>
+
           <div class="contact-grid">
+
             <article class="contact-card">
               <div class="contact-buttons">
                 <a class="contact-button" href="https://discord.com/invite/sHn3WwRZpH" target="_blank" rel="noreferrer" data-i18n="contactDiscord">Discord</a>
@@ -1161,8 +1363,23 @@
     };
     const availableTabs = ["home", "about", "join", "contact"];
     const defaultLang = "en";
+    const localServerOrigin = "http://localhost:3000";
     let driverKmCache = null;
     let driverKmFailed = false;
+    let currentSiteRole = "guest";
+    function shouldUseLocalServer() {
+      if (window.location.protocol === "file:") return true;
+      if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+        return window.location.port !== "3000";
+      }
+      return false;
+    }
+    function redirectToLocalServer() {
+      const target = new URL(window.location.pathname || "/", localServerOrigin);
+      target.search = window.location.search;
+      target.hash = window.location.hash;
+      window.location.href = target.toString();
+    }
     function getState() {
       const params = new URLSearchParams(window.location.search);
       const lang = translations[params.get("lang")] ? params.get("lang") : (localStorage.getItem("etc-lang") || defaultLang);
@@ -1292,6 +1509,127 @@
         });
       });
     }
+    function showSiteLogin(role = "admin") {
+      const overlay = document.getElementById("site-login-overlay");
+      if (overlay) {
+        overlay.classList.remove("is-hidden");
+        overlay.setAttribute("aria-hidden", "false");
+      }
+      setSiteRole(role);
+    }
+    function setSiteRole(role) {
+      currentSiteRole = ["guest", "admin", "owner"].includes(role) ? role : "guest";
+      const roleInput = document.getElementById("site-role-input");
+      const panelRoleInput = document.getElementById("panel-role-input");
+      const passwordWrap = document.getElementById("site-password-wrap");
+      const passwordInput = document.getElementById("site-password");
+      const passwordLabel = document.getElementById("site-password-label");
+      const submitButton = document.getElementById("site-login-submit");
+      const error = document.getElementById("site-login-error");
+
+      if (roleInput) roleInput.value = currentSiteRole;
+      if (panelRoleInput) panelRoleInput.value = currentSiteRole;
+      document.querySelectorAll("[data-site-role]").forEach((button) => {
+        button.classList.toggle("is-active", button.dataset.siteRole === currentSiteRole);
+      });
+      if (error) error.classList.remove("is-visible");
+
+      const needsPassword = currentSiteRole === "admin" || currentSiteRole === "owner";
+      if (passwordWrap) passwordWrap.classList.toggle("is-hidden", !needsPassword);
+      if (passwordInput) {
+        passwordInput.required = needsPassword;
+        passwordInput.value = "";
+      }
+      if (passwordLabel) passwordLabel.textContent = currentSiteRole === "owner" ? "Owner code" : "Admin code";
+      if (submitButton) {
+        submitButton.textContent = currentSiteRole === "guest"
+          ? "Continue as guest"
+          : `Login as ${currentSiteRole}`;
+      }
+    }
+    function rememberSiteLogin(role) {
+      const remember = document.getElementById("site-remember");
+      if (remember?.checked) {
+        localStorage.setItem("etc-login-remembered", "1");
+        localStorage.setItem("etc-login-role", role);
+        return;
+      }
+      localStorage.removeItem("etc-login-remembered");
+      localStorage.removeItem("etc-login-role");
+    }
+    function applyRememberedSiteLogin() {
+      if (localStorage.getItem("etc-login-remembered") !== "1") return;
+      const role = localStorage.getItem("etc-login-role") || "guest";
+      const remember = document.getElementById("site-remember");
+      if (remember) remember.checked = true;
+      if (role === "guest") {
+        completeSiteLogin("guest");
+        return;
+      }
+      showSiteLogin(role);
+    }
+    function shouldSkipSiteLogin() {
+      return new URLSearchParams(window.location.search).get("fromPanel") === "1";
+    }
+    function clearPanelReturnFlag() {
+      const url = new URL(window.location.href);
+      if (!url.searchParams.has("fromPanel")) return;
+      url.searchParams.delete("fromPanel");
+      window.history.replaceState({}, "", url);
+    }
+    function completeSiteLogin(role) {
+      const overlay = document.getElementById("site-login-overlay");
+      if (overlay) {
+        overlay.classList.add("is-hidden");
+        overlay.setAttribute("aria-hidden", "true");
+      }
+      if (!localStorage.getItem("etc-language-overlay-seen")) {
+        showLanguageOverlay();
+      }
+    }
+    function bindSiteLogin() {
+      const form = document.getElementById("site-login-form");
+      const error = document.getElementById("site-login-error");
+      const botPanelLink = document.getElementById("bot-panel-link");
+      document.querySelectorAll("[data-site-role]").forEach((button) => {
+        button.addEventListener("click", () => {
+          setSiteRole(button.dataset.siteRole);
+          if (button.dataset.siteRole === "guest") {
+            rememberSiteLogin("guest");
+            completeSiteLogin("guest");
+          }
+        });
+      });
+      if (botPanelLink) {
+        botPanelLink.addEventListener("click", (event) => {
+          event.preventDefault();
+          showSiteLogin("admin");
+        });
+      }
+      if (!form) return;
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const passwordInput = document.getElementById("site-password");
+        if (error) error.classList.remove("is-visible");
+        if (currentSiteRole === "guest") {
+          completeSiteLogin(currentSiteRole);
+          return;
+        }
+        if (!passwordInput?.value) {
+          if (error) {
+            error.textContent = "Enter your code.";
+            error.classList.add("is-visible");
+          }
+          return;
+        }
+        rememberSiteLogin(currentSiteRole);
+        form.method = "post";
+        form.action = shouldUseLocalServer() ? `${localServerOrigin}/login` : "/login";
+        form.submit();
+      });
+      setSiteRole("guest");
+      applyRememberedSiteLogin();
+    }
     function initParticles() {
       const holder = document.getElementById("particles");
       if (!holder) return;
@@ -1309,6 +1647,10 @@
       `).join("");
     }
     function init() {
+      if (shouldUseLocalServer()) {
+        redirectToLocalServer();
+        return;
+      }
       initParticles();
       const { lang, tab } = getState();
       applyLanguage(lang);
@@ -1317,8 +1659,10 @@
       refreshLinks(lang, tab);
       bindTabNavigation();
       bindLanguageOverlay();
-      if (!localStorage.getItem("etc-language-overlay-seen")) {
-        showLanguageOverlay();
+      bindSiteLogin();
+      if (shouldSkipSiteLogin()) {
+        completeSiteLogin("guest");
+        clearPanelReturnFlag();
       }
       window.addEventListener("popstate", () => {
         const state = getState();
@@ -1327,7 +1671,65 @@
         refreshLinks(state.lang, state.tab);
       });
     }
+    // Welcome preview modal (server join + DM)
+    const welcomeOverlay = document.getElementById("welcome-preview-overlay");
+    const welcomeCloseBtn = document.getElementById("welcome-preview-close");
+    const welcomeSubtitle = document.getElementById("welcome-preview-subtitle");
+    const welcomeTitle = document.getElementById("welcome-preview-title");
+    const welcomeDesc = document.getElementById("welcome-preview-desc");
+    const welcomeImg = document.getElementById("welcome-preview-image");
+
+    async function loadWelcomePreview(which) {
+      try {
+        const res = await fetch("/api/welcome-preview");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const payload = await res.json();
+
+        const embed = which === "dm" ? payload.dmEmbed : payload.serverEmbed;
+        const label = which === "dm" ? "DM Welcome" : "Server Welcome";
+
+        if (welcomeSubtitle) welcomeSubtitle.textContent = label;
+        if (welcomeTitle) welcomeTitle.textContent = embed?.title || "(no title)";
+        if (welcomeDesc) welcomeDesc.textContent = embed?.description || "";
+
+        if (welcomeImg) {
+          const url = embed?.imageUrl || "";
+          if (url) {
+            welcomeImg.src = url;
+            welcomeImg.style.display = "block";
+          } else {
+            welcomeImg.src = "";
+            welcomeImg.style.display = "none";
+          }
+        }
+      } catch (e) {
+        if (welcomeSubtitle) welcomeSubtitle.textContent = "Welcome preview (error)";
+        if (welcomeTitle) welcomeTitle.textContent = "Failed to load";
+        if (welcomeDesc) welcomeDesc.textContent = String(e?.message || e);
+        if (welcomeImg) welcomeImg.style.display = "none";
+      }
+    }
+
+    document.querySelectorAll("[data-open-welcome-preview]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (!welcomeOverlay) return;
+        welcomeOverlay.classList.add("is-visible");
+        welcomeOverlay.setAttribute("aria-hidden", "false");
+        const which = btn.dataset.openWelcomePreview;
+        await loadWelcomePreview(which);
+      });
+    });
+
+    if (welcomeCloseBtn) {
+      welcomeCloseBtn.addEventListener("click", () => {
+        if (!welcomeOverlay) return;
+        welcomeOverlay.classList.remove("is-visible");
+        welcomeOverlay.setAttribute("aria-hidden", "true");
+      });
+    }
+
     init();
   </script>
 </body>
 </html>
+

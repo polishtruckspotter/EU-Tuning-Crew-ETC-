@@ -5,10 +5,44 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "node",
+            "request": "launch",
+            "name": "Run ETC Website + Bot Panel",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["run", "dev"],
+            "cwd": "${workspaceFolder}/bot",
+            "console": "integratedTerminal", 
+            "serverReadyAction": {
+                "pattern": "ETC website and bot panel running at (http://localhost:[0-9]+)",
+                "uriFormat": "%s",
+                "action": "openExternally"
+            }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Run ETC Bot Panel Only",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["run", "dev"],
+            "cwd": "${workspaceFolder}/bot",
+            "console": "integratedTerminal", 
+            "serverReadyAction": {
+                "pattern": "ETC website and bot panel running at (http://localhost:[0-9]+)",
+                "uriFormat": "%s/login",
+                "action": "openExternally"
+            }
+        },
+        {
             "type": "chrome",
             "request": "launch",
-            "name": "Open index.html",
-            "file": "c:\\EU Tuning Crew ETC\\index.html"
+            "name": "Open ETC Website",
+            "url": "http://localhost:3000"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Open ETC Bot Panel",
+            "url": "http://localhost:3000/login"
         }
     ]
 }
