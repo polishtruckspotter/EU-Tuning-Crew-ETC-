@@ -50,7 +50,7 @@ function createApiResponse(res) {
 }
 
 async function serveStatic(req, res, pathname) {
-  const requestedPath = pathname === "/" ? "/index.html" : pathname;
+  const requestedPath = pathname === "/" ? (existsSync(join(rootDir, "dist")) ? "/dist/index.html" : "/index.html") : pathname;
   const safePath = normalize(requestedPath).replace(/^(\.\.[/\\])+/, "");
   const filePath = join(rootDir, safePath);
 
@@ -72,6 +72,27 @@ async function serveStatic(req, res, pathname) {
   });
   createReadStream(filePath).pipe(res);
 }
+
+
+
+  if (!filePath.startsWith(rootDir) || !existsSync(filePath)) {
+    sendJson(res, 404, { error: "Not found" });
+    return;
+  }
+
+  const fileStats = await stat(filePath);
+  if (!fileStats.isFile()) {
+    sendJson(res, 404, { error: "Not found" });
+    return;
+  }
+
+  const ext = extname(filePath).toLowerCase();
+  res.writeHead(200, {
+    "Content-Type": contentTypes[ext] || "application/octet-stream",
+    "Content-Length": fileStats.size
+  });
+  createReadStream(filePath).pipe(res);
+
 
 const server = createServer(async (req, res) => {
   try {
