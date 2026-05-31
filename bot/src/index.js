@@ -2059,3 +2059,16 @@ async function start() {
 }
 
 start();
+const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// This responds immediately to the cron-job ping
+app.get('/', (req, res) => {
+    res.status(200).send('Bot is awake!');
+});
+
+app.listen(PORT, () => {
+    console.log(`Ping receiver listening on port ${PORT}`);
+});
+
