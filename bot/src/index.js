@@ -5,7 +5,6 @@ import { createReadStream, existsSync, mkdirSync } from "node:fs";
 import { readFile, stat, writeFile } from "node:fs/promises";
 import { dirname, extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
-import trucksbookHandler from "../../api/trucksbook-km.js";
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -1611,6 +1610,7 @@ function startPanelServer() {
       const url = new URL(req.url, `http://${req.headers.host || `localhost:${port}`}`);
 
       if (url.pathname === "/api/trucksbook-km") {
+        const { default: trucksbookHandler } = await import("../../api/trucksbook-km.js");
         await trucksbookHandler(req, createApiResponse(res));
         return;
       }
