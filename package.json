@@ -3,6 +3,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node server.mjs"
+    "dev": "node server.mjs",
+    "start": "node bot/src/index.js",
+    "bot": "node bot/src/index.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.20.0",
+    "dotenv": "^16.6.1"
   }
 }
