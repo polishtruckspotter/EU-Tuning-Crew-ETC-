@@ -10,10 +10,10 @@
             "name": "Run ETC Website + Bot Panel",
             "runtimeExecutable": "npm",
             "runtimeArgs": ["run", "dev"],
-            "cwd": "${workspaceFolder}/bot",
+            "cwd": "${workspaceFolder}",
             "console": "integratedTerminal", 
             "serverReadyAction": {
-                "pattern": "ETC website and bot panel running at (http://localhost:[0-9]+)",
+                "pattern": "EU Tuning Crew local server running at (http://localhost:[0-9]+)",
                 "uriFormat": "%s",
                 "action": "openExternally"
             }
@@ -25,6 +25,9 @@
             "runtimeExecutable": "npm",
             "runtimeArgs": ["run", "dev"],
             "cwd": "${workspaceFolder}/bot",
+            "env": {
+                "BOT_PANEL_PORT": "10001"
+            },
             "console": "integratedTerminal", 
             "serverReadyAction": {
                 "pattern": "ETC website and bot panel running at (http://localhost:[0-9]+)",
@@ -42,7 +45,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Open ETC Bot Panel",
-            "url": "http://localhost:3000/login"
+            "url": "http://localhost:10001/login"
         }
     ]
 }
