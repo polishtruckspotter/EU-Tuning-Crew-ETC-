@@ -1106,7 +1106,7 @@
         <a class="nav-link" data-tab-link data-tab="about" href="./index.html?tab=about&lang=en" data-i18n="navAbout">About Us</a>
         <a class="nav-link" data-tab-link data-tab="join" href="./index.html?tab=join&lang=en" data-i18n="navJoin">Join Us</a>
         <a class="nav-link" data-tab-link data-tab="contact" href="./index.html?tab=contact&lang=en" data-i18n="navContact">Contact</a>
-        <a class="nav-link bot-panel-link" id="bot-panel-link" href="/login">BOT PANEL</a>
+        <a class="nav-link bot-panel-link" id="bot-panel-link" href="/api/panel?panelPath=/login">BOT PANEL</a>
       </nav>
       <div class="status-pill">
         <span class="status-dot" aria-hidden="true"></span>
@@ -1624,7 +1624,7 @@
         }
         rememberSiteLogin(currentSiteRole);
         form.method = "post";
-        form.action = shouldUseLocalServer() ? `${localServerOrigin}/login` : "/login";
+        form.action = shouldUseLocalServer() ? `${localServerOrigin}/login` : "/api/panel?panelPath=/login";
         form.submit();
       });
       setSiteRole("guest");
@@ -1732,4 +1732,3 @@
   </script>
 </body>
 </html>
-

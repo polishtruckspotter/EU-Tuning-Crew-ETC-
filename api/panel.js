@@ -113,7 +113,7 @@ function renderLogin(message = "", selectedRole = "admin") {
     <h1>ETC Login</h1>
     <p>Login as owner or admin to open the hosted bot panel.</p>
     ${message ? `<p class="error">${escapeHtml(message)}</p>` : ""}
-    <form method="post" action="/login">
+    <form method="post" action="/api/panel?panelPath=/login">
       <label for="role">Role</label>
       <select id="role" name="role">
         <option value="admin"${role === "admin" ? " selected" : ""}>Admin</option>
@@ -138,7 +138,7 @@ function renderAdmin(role, message = "") {
     <p>This hosted panel login is active on Vercel. Live Discord bot runtime actions still need the bot process running outside Vercel.</p>
     <div class="row">
       <a class="button" href="/?fromPanel=1">Open Website</a>
-      <form method="post" action="/logout"><button class="ghost" type="submit">Logout</button></form>
+      <form method="post" action="/api/panel?panelPath=/logout"><button class="ghost" type="submit">Logout</button></form>
     </div>
   </main>`);
 }
@@ -171,14 +171,14 @@ export default async function handler(req, res) {
         return;
       }
 
-      redirect(res, "/admin", {
+      redirect(res, "/api/panel?panelPath=/admin", {
         "Set-Cookie": `etc_panel_session=${encodeURIComponent(createSession(role))}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${maxAgeSeconds}`
       });
       return;
     }
 
     if (req.method === "POST" && path === "/logout") {
-      redirect(res, "/login", {
+      redirect(res, "/api/panel?panelPath=/login", {
         "Set-Cookie": "etc_panel_session=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0"
       });
       return;
@@ -192,7 +192,7 @@ export default async function handler(req, res) {
     if (path === "/admin" || path.startsWith("/admin/")) {
       const session = readSession(req);
       if (!session) {
-        redirect(res, "/login");
+        redirect(res, "/api/panel?panelPath=/login");
         return;
       }
 
