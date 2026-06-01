@@ -26,7 +26,7 @@ const clientId = process.env.CLIENT_ID;
 const panelPassword = process.env.PANEL_PASSWORD || "etc-panel";
 const defaultOwnerPassword = process.env.OWNER_PASSWORD || panelPassword;
 const defaultAdminPassword = process.env.ADMIN_PASSWORD || "etc-admin";
-const port = Number(process.env.PORT || 3000);
+const port = Number(process.env.BOT_PANEL_PORT || 10001);
 const sourceDir = dirname(fileURLToPath(import.meta.url));
 const projectRoot = join(sourceDir, "..", "..");
 const dataDir = join(sourceDir, "..", "data");
@@ -2059,18 +2059,3 @@ async function start() {
 }
 
 start();
-const express = require('express');
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// This responds immediately to the cron-job ping
-app.get('/', (req, res) => {
-    res.status(200).send('Bot is awake!');
-});
-
-app.listen(PORT, () => {
-    console.log(`Ping receiver listening on port ${PORT}`);
-});
-
-const axios = require('axios');
-

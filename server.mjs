@@ -121,12 +121,5 @@ server.listen(port, () => {
   console.log(`EU Tuning Crew local server running at http://localhost:${port}`);
 });
 
-// Set port to 10001 internally so the bot panel binds there
-const port = process.env.PORT || 10001;
-server.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-});
-
-
 // Start the bot backend automatically alongside the website server
 import("./bot/src/index.js").catch(err => console.error("Failed to start bot:", err));
