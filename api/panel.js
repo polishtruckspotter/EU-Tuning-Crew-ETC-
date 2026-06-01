@@ -5,6 +5,31 @@ const ownerPassword = process.env.OWNER_PASSWORD || panelPassword;
 const adminPassword = process.env.ADMIN_PASSWORD || "etc-admin";
 const cookieSecret = process.env.COOKIE_SECRET || ownerPassword || panelPassword;
 const maxAgeSeconds = 60 * 60 * 12;
+const botApiUrl = process.env.BOT_API_URL || process.env.WISPBYTE_BOT_API_URL || "";
+const botApiSecret = process.env.BOT_API_SECRET || process.env.PANEL_API_SECRET || "";
+
+const fallbackConfig = {
+  activityText: "EU Tuning Crew",
+  statusReply: "ETC bot is online and ready.",
+  pingReply: "Pong! {ping}ms",
+  noPingStaffRoleId: "",
+  modmailGuildId: "",
+  modmailCategoryId: "",
+  modmailPanelChannelId: "",
+  modmailIntroText: "Welcome to ETC modmail. Press Open Modmail to start a modmail, send your message, and use ./close modmail when you are done.",
+  modmailOpenedText: "Your ETC modmail is now open. Send your message here and the staff team will receive it.",
+  modmailClosedText: "Your ETC modmail has been closed. If you need help again, press Open Modmail to reopen it.",
+  welcomeJoinChannelId: "",
+  welcomeEmbedTitle: "Welcome to ETC!",
+  welcomeEmbedDescription: "Hey ${member}! Welcome to **EU Tuning Crew**.",
+  welcomeEmbedColor: "0x1ff2d2",
+  welcomeEmbedImageUrl: "welcome message.png",
+  pvModmailEnabled: false,
+  pvEmbedTitle: "PV",
+  pvEmbedDescription: "${content}",
+  pvEmbedColor: "0x1ff2d2",
+  pvEmbedImageUrl: ""
+};
 
 function escapeHtml(value) {
   return String(value)
@@ -130,12 +155,49 @@ function renderLogin(message = "", selectedRole = "admin") {
   </main>`);
 }
 
-function renderAdmin(role, message = "") {
+function renderAdmin(role, message = "", state = { config: fallbackConfig, stats: {} }) {
+  const config = { ...fallbackConfig, ...(state.config || {}) };
+  const stats = state.stats || {};
   return page("ETC Bot Panel", `<main>
     <h1>Bot Panel</h1>
     ${message ? `<p>${escapeHtml(message)}</p>` : ""}
+    ${state.error ? `<p class="error">Wispbyte API: ${escapeHtml(state.error)}</p>` : ""}
     <p>You are logged in as <strong>${escapeHtml(role)}</strong>.</p>
-    <p>This hosted panel login is active on Vercel. Live Discord bot runtime actions still need the bot process running outside Vercel.</p>
+    <p>Panel is hosted on Vercel. Bot runtime is controlled through the Wispbyte bot API.</p>
+    <p><strong>Bot:</strong> ${escapeHtml(stats.botTag || "Unknown")} | <strong>Mode:</strong> ${escapeHtml(stats.discordMode || "Unknown")} | <strong>Guilds:</strong> ${escapeHtml(stats.guilds ?? 0)} | <strong>Open modmail:</strong> ${escapeHtml(stats.openTickets ?? 0)}</p>
+    <form method="post" action="/api/panel?panelPath=/admin/save-bot">
+      <label for="activityText">Bot activity text</label>
+      <input id="activityText" name="activityText" value="${escapeHtml(config.activityText)}" required>
+      <label for="statusReply">/status reply</label>
+      <input id="statusReply" name="statusReply" value="${escapeHtml(config.statusReply)}" required>
+      <label for="pingReply">/ping reply</label>
+      <input id="pingReply" name="pingReply" value="${escapeHtml(config.pingReply)}" required>
+      <label for="noPingStaffRoleId">Staff role ID for no-ping warns</label>
+      <input id="noPingStaffRoleId" name="noPingStaffRoleId" value="${escapeHtml(config.noPingStaffRoleId)}">
+      <button type="submit">Save bot settings</button>
+    </form>
+    <form method="post" action="/api/panel?panelPath=/admin/save-modmail">
+      <label for="modmailGuildId">Modmail guild ID</label>
+      <input id="modmailGuildId" name="modmailGuildId" value="${escapeHtml(config.modmailGuildId)}">
+      <label for="modmailCategoryId">Modmail category ID</label>
+      <input id="modmailCategoryId" name="modmailCategoryId" value="${escapeHtml(config.modmailCategoryId)}">
+      <label for="modmailPanelChannelId">Modmail panel channel ID</label>
+      <input id="modmailPanelChannelId" name="modmailPanelChannelId" value="${escapeHtml(config.modmailPanelChannelId)}">
+      <label for="modmailIntroText">Modmail intro text</label>
+      <input id="modmailIntroText" name="modmailIntroText" value="${escapeHtml(config.modmailIntroText)}">
+      <label for="modmailOpenedText">Modmail opened reply</label>
+      <input id="modmailOpenedText" name="modmailOpenedText" value="${escapeHtml(config.modmailOpenedText)}">
+      <label for="modmailClosedText">Modmail closed reply</label>
+      <input id="modmailClosedText" name="modmailClosedText" value="${escapeHtml(config.modmailClosedText)}">
+      <button type="submit">Save modmail</button>
+    </form>
+    ${role === "owner" ? `<form method="post" action="/api/panel?panelPath=/admin/save-access">
+      <label for="adminPassword">Admin password</label>
+      <input id="adminPassword" name="adminPassword" type="password" value="${escapeHtml(adminPassword)}" required>
+      <label for="ownerPassword">Owner password</label>
+      <input id="ownerPassword" name="ownerPassword" type="password" value="${escapeHtml(ownerPassword)}" required>
+      <button type="submit">Save access passwords</button>
+    </form>` : ""}
     <div class="row">
       <a class="button" href="/?fromPanel=1">Open Website</a>
       <form method="post" action="/api/panel?panelPath=/logout"><button class="ghost" type="submit">Logout</button></form>
@@ -146,6 +208,56 @@ function renderAdmin(role, message = "") {
 function getPanelPath(req) {
   const url = new URL(req.url, `https://${req.headers.host || "localhost"}`);
   return url.searchParams.get("panelPath") || url.pathname;
+}
+
+async function callBotApi(path, init = {}) {
+  if (!botApiUrl) return null;
+
+  const response = await fetch(new URL(path, botApiUrl), {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...(botApiSecret ? { Authorization: `Bearer ${botApiSecret}` } : {}),
+      ...(init.headers || {})
+    }
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload.error || `Bot API returned HTTP ${response.status}`);
+  }
+  return payload;
+}
+
+async function loadPanelState() {
+  const state = await callBotApi("/api/panel-state").catch((error) => ({
+    error: error.message
+  }));
+
+  return {
+    config: { ...fallbackConfig, ...(state?.config || {}) },
+    stats: {
+      botTag: "Wispbyte bot",
+      discordMode: botApiUrl ? "Connected to Wispbyte API" : "BOT_API_URL missing",
+      guilds: 0,
+      openTickets: 0,
+      activeWarns: 0,
+      modmailReady: "Unknown",
+      ...(state?.stats || {})
+    },
+    error: state?.error || ""
+  };
+}
+
+async function saveRemoteConfig(configPatch) {
+  if (!botApiUrl) {
+    throw new Error("BOT_API_URL is not set in Vercel.");
+  }
+
+  await callBotApi("/api/panel-config", {
+    method: "POST",
+    body: JSON.stringify({ config: configPatch })
+  });
 }
 
 export default async function handler(req, res) {
@@ -196,12 +308,38 @@ export default async function handler(req, res) {
         return;
       }
 
-      if (req.method === "POST") {
-        sendHtml(res, 200, renderAdmin(session.role, "Hosted panel received the request."));
+      if (req.method === "POST" && path === "/admin/save-bot") {
+        const form = await parseFormBody(req);
+        await saveRemoteConfig({
+          activityText: form.activityText?.trim() || fallbackConfig.activityText,
+          statusReply: form.statusReply?.trim() || fallbackConfig.statusReply,
+          pingReply: form.pingReply?.trim() || fallbackConfig.pingReply,
+          noPingStaffRoleId: form.noPingStaffRoleId?.trim() || ""
+        });
+        sendHtml(res, 200, renderAdmin(session.role, "Bot settings saved to the Wispbyte bot.", await loadPanelState()));
         return;
       }
 
-      sendHtml(res, 200, renderAdmin(session.role));
+      if (req.method === "POST" && path === "/admin/save-modmail") {
+        const form = await parseFormBody(req);
+        await saveRemoteConfig({
+          modmailGuildId: form.modmailGuildId?.trim() || "",
+          modmailCategoryId: form.modmailCategoryId?.trim() || "",
+          modmailPanelChannelId: form.modmailPanelChannelId?.trim() || "",
+          modmailIntroText: form.modmailIntroText?.trim() || fallbackConfig.modmailIntroText,
+          modmailOpenedText: form.modmailOpenedText?.trim() || fallbackConfig.modmailOpenedText,
+          modmailClosedText: form.modmailClosedText?.trim() || fallbackConfig.modmailClosedText
+        });
+        sendHtml(res, 200, renderAdmin(session.role, "Modmail settings saved to the Wispbyte bot.", await loadPanelState()));
+        return;
+      }
+
+      if (req.method === "POST" && path === "/admin/save-access") {
+        sendHtml(res, 403, renderAdmin(session.role, "Change panel passwords in Vercel Environment Variables, then redeploy.", await loadPanelState()));
+        return;
+      }
+
+      sendHtml(res, 200, renderAdmin(session.role, "", await loadPanelState()));
       return;
     }
 

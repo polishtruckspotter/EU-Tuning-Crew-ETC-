@@ -27,6 +27,7 @@ const panelPassword = process.env.PANEL_PASSWORD || "etc-panel";
 const defaultOwnerPassword = process.env.OWNER_PASSWORD || panelPassword;
 const defaultAdminPassword = process.env.ADMIN_PASSWORD || "etc-admin";
 const port = Number(process.env.BOT_PANEL_PORT || 10001);
+const panelApiSecret = process.env.PANEL_API_SECRET || process.env.BOT_API_SECRET || "";
 const sourceDir = dirname(fileURLToPath(import.meta.url));
 const projectRoot = join(sourceDir, "..", "..");
 const dataDir = join(sourceDir, "..", "data");
@@ -1083,6 +1084,49 @@ function sendJson(res, statusCode, payload) {
   res.end(JSON.stringify(payload));
 }
 
+function isPanelApiAuthorized(req) {
+  if (!panelApiSecret) return false;
+  const header = req.headers.authorization || "";
+  const token = header.startsWith("Bearer ") ? header.slice(7) : "";
+  return safeCompare(token, panelApiSecret);
+}
+
+function parseJsonBody(req) {
+  return new Promise((resolve, reject) => {
+    let body = "";
+    req.on("data", (chunk) => {
+      body += chunk.toString();
+      if (body.length > 1_000_000) {
+        reject(new Error("Body too large"));
+      }
+    });
+    req.on("end", () => {
+      try {
+        resolve(body ? JSON.parse(body) : {});
+      } catch (error) {
+        reject(error);
+      }
+    });
+    req.on("error", reject);
+  });
+}
+
+function getPanelStats() {
+  const openTickets = Object.values(tickets).filter((ticket) => ticket.status === "open").length;
+  const activeWarns = Object.values(warnings).reduce((total, guildWarnings) => {
+    return total + Object.values(guildWarnings).reduce((guildTotal, userWarning) => guildTotal + (userWarning.count || 0), 0);
+  }, 0);
+
+  return {
+    botTag: client.isReady() ? client.user.tag : (discordReady ? "Starting..." : "Panel-only mode"),
+    discordMode: discordReady ? "Enabled" : "Panel Only",
+    guilds: client.guilds.cache.size,
+    openTickets,
+    activeWarns,
+    modmailReady: isModmailConfigured() ? "Configured" : "Needs setup"
+  };
+}
+
 function createApiResponse(res) {
   return {
     statusCode: 200,
@@ -1568,6 +1612,40 @@ function startPanelServer() {
 
       if (url.pathname === "/api/trucksbook-km") {
         await trucksbookHandler(req, createApiResponse(res));
+        return;
+      }
+
+      if (url.pathname === "/api/panel-state") {
+        if (!isPanelApiAuthorized(req)) {
+          sendJson(res, 401, { error: "Unauthorized" });
+          return;
+        }
+        sendJson(res, 200, {
+          config: botConfig,
+          stats: getPanelStats()
+        });
+        return;
+      }
+
+      if (url.pathname === "/api/panel-config") {
+        if (!isPanelApiAuthorized(req)) {
+          sendJson(res, 401, { error: "Unauthorized" });
+          return;
+        }
+        if (req.method !== "POST" && req.method !== "PATCH") {
+          sendJson(res, 405, { error: "Method not allowed" });
+          return;
+        }
+        const payload = await parseJsonBody(req);
+        await saveConfig({
+          ...botConfig,
+          ...(payload.config || {})
+        });
+        sendJson(res, 200, {
+          ok: true,
+          config: botConfig,
+          stats: getPanelStats()
+        });
         return;
       }
 
