@@ -1,5 +1,27 @@
 {
   "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/login",
+      "destination": "/api/panel?panelPath=/login"
+    },
+    {
+      "source": "/logout",
+      "destination": "/api/panel?panelPath=/logout"
+    },
+    {
+      "source": "/site",
+      "destination": "/api/panel?panelPath=/site"
+    },
+    {
+      "source": "/admin",
+      "destination": "/api/panel?panelPath=/admin"
+    },
+    {
+      "source": "/admin/:path*",
+      "destination": "/api/panel?panelPath=/admin/:path*"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
