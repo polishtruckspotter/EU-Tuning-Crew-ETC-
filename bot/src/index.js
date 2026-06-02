@@ -29,7 +29,7 @@ const port = Number(process.env.BOT_PANEL_PORT || 10001);
 const panelApiSecret = process.env.PANEL_API_SECRET || process.env.BOT_API_SECRET || "";
 const sourceDir = dirname(fileURLToPath(import.meta.url));
 const projectRoot = join(sourceDir, "..", "..");
-const dataDir = join(sourceDir, "..", "data");
+const dataDir = join(process.cwd(), "data");
 const configPath = join(dataDir, "config.json");
 const ticketsPath = join(dataDir, "tickets.json");
 const warningsPath = join(dataDir, "warnings.json");
@@ -1969,7 +1969,7 @@ function startPanelServer() {
   });
 }
 
-client.once("ready", () => {
+client.once("clientReady", () => {
   console.log(`Logged in as ${client.user.tag}`);
   client.user.setActivity(botConfig.activityText);
 });
