@@ -1,11 +1,34 @@
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import { config as dotenvConfig } from "dotenv";
+import { existsSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const currentDir = dirname(fileURLToPath(import.meta.url));
+const rootEnv = join(currentDir, ".env");
+const botEnv = join(currentDir, "bot", ".env");
+
+dotenvConfig({ path: rootEnv });
+if (existsSync(botEnv)) {
+  dotenvConfig({ path: botEnv });
+}
 
 const panelPassword = process.env.PANEL_PASSWORD || "etc-panel";
 const ownerPassword = process.env.OWNER_PASSWORD || panelPassword;
 const adminPassword = process.env.ADMIN_PASSWORD || "etc-admin";
 const cookieSecret = process.env.COOKIE_SECRET || ownerPassword || panelPassword;
 const maxAgeSeconds = 60 * 60 * 12;
-const botApiUrl = process.env.BOT_API_URL || process.env.WISPBYTE_BOT_API_URL || (process.env.NODE_ENV !== "production" ? "http://localhost:10001" : "");
+
+function normalizeUrl(value) {
+  if (!value) return "";
+  return value.trim().replace(/\/+$/g, "").replace(/\/api$/i, "");
+}
+
+const remoteBotApiUrl = normalizeUrl(process.env.BOT_API_URL || process.env.WISPBYTE_BOT_API_URL);
+const explicitLocalBotApiUrl = normalizeUrl(process.env.LOCAL_BOT_API_URL);
+const devLocalBotApiUrl = process.env.NODE_ENV === "production" ? "" : normalizeUrl(`http://127.0.0.1:${process.env.BOT_PANEL_PORT || 10001}`);
+const localBotApiUrl = explicitLocalBotApiUrl || devLocalBotApiUrl;
+let botApiUrl = remoteBotApiUrl || localBotApiUrl;
 const botApiSecret = process.env.BOT_API_SECRET || process.env.PANEL_API_SECRET || "";
 
 const fallbackConfig = {
@@ -623,24 +646,40 @@ function getPanelPath(req) {
 }
 
 async function callBotApi(path, init = {}) {
+  async function fetchFromUrl(url) {
+    const target = new URL(path, url);
+    const response = await fetch(target, {
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        ...(botApiSecret ? { Authorization: `Bearer ${botApiSecret}` } : {}),
+        ...(init.headers || {})
+      }
+    }).catch((error) => {
+      throw new Error(`fetch failed to ${target.href}: ${error.message}`);
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(payload.error || `Bot API returned HTTP ${response.status} from ${target.href}`);
+    }
+    return payload;
+  }
+
   if (!botApiUrl) {
     throw new Error("BOT_API_URL is not configured.");
   }
 
-  const response = await fetch(new URL(path, botApiUrl), {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(botApiSecret ? { Authorization: `Bearer ${botApiSecret}` } : {}),
-      ...(init.headers || {})
+  try {
+    return await fetchFromUrl(botApiUrl);
+  } catch (firstError) {
+    const canUseLocalFallback = process.env.NODE_ENV !== "production" && remoteBotApiUrl && localBotApiUrl && remoteBotApiUrl !== localBotApiUrl;
+    if (canUseLocalFallback) {
+      botApiUrl = localBotApiUrl;
+      return await fetchFromUrl(localBotApiUrl);
     }
-  });
-
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    throw new Error(payload.error || `Bot API returned HTTP ${response.status}`);
+    throw firstError;
   }
-  return payload;
 }
 
 async function loadPanelState() {
@@ -652,7 +691,7 @@ async function loadPanelState() {
     config: { ...fallbackConfig, ...(state?.config || {}) },
     stats: {
       botTag: "Wispbyte bot",
-      discordMode: botApiUrl ? "Connected to Wispbyte API" : "BOT_API_URL missing",
+      discordMode: botApiUrl ? "Connected to bot API" : "BOT_API_URL missing",
       guilds: 0,
       openTickets: 0,
       activeWarns: 0,
