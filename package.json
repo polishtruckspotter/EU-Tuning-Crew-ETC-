@@ -4,11 +4,13 @@
   "type": "module",
   "scripts": {
     "dev": "node server.mjs",
-    "start": "node index.js",
-    "bot": "node bot/src/index.js"
+    "start": "pm2 start ecosystem.config.js --no-daemon",
+    "bot": "node bot/src/index.js",
+    "postinstall": "cd bot && npm install && cd backend && npm install"
   },
   "dependencies": {
     "discord.js": "^14.20.0",
-    "dotenv": "^16.6.1"
+    "dotenv": "^16.6.1",
+    "pm2": "^5.2.0"
   }
 }
