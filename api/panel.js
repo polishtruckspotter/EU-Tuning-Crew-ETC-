@@ -24,7 +24,12 @@ function normalizeUrl(value) {
   return value.trim().replace(/\/+$/g, "").replace(/\/api$/i, "");
 }
 
-const remoteBotApiUrl = normalizeUrl(process.env.BOT_API_URL || process.env.WISPBYTE_BOT_API_URL);
+const remoteBotApiUrl = normalizeUrl(
+  process.env.BOT_API_URL ||
+  process.env.WISPBYTE_BOT_API_URL ||
+  process.env.VERCEL_BOT_API_URL ||
+  process.env.BOT_URL
+);
 const explicitLocalBotApiUrl = normalizeUrl(process.env.LOCAL_BOT_API_URL);
 const devLocalBotApiUrl = process.env.NODE_ENV === "production" ? "" : normalizeUrl(`http://127.0.0.1:${process.env.BOT_PANEL_PORT || 10001}`);
 const localBotApiUrl = explicitLocalBotApiUrl || devLocalBotApiUrl;
@@ -704,7 +709,7 @@ async function loadPanelState() {
 
 async function saveRemoteConfig(configPatch) {
   if (!botApiUrl) {
-    throw new Error("BOT_API_URL is not set in Vercel.");
+    throw new Error("BOT_API_URL, WISPBYTE_BOT_API_URL, or VERCEL_BOT_API_URL is not set in Vercel.");
   }
 
   await callBotApi("/api/panel-config", {
