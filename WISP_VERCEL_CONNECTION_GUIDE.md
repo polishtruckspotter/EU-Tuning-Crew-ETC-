@@ -35,7 +35,7 @@ Save this value - you'll need it for Vercel environment variables.
 
 ```env
 # Discord Bot Credentials
-DISCORD_TOKEN=MTQ4MzM4OTc0NjkyMjM5MzcyMA.GP37Ou.tEsSH-y6VqV5xoGGnrimjgGTUYINE5jeOM7MxQ
+DISCORD_TOKEN=your-discord-bot-token
 CLIENT_ID=1483389746922393720
 
 # Panel Passwords
