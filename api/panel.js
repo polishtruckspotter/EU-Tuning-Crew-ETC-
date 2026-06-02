@@ -13,10 +13,11 @@ const fallbackConfig = {
   statusReply: "ETC bot is online and ready.",
   pingReply: "Pong! {ping}ms",
   noPingStaffRoleId: "",
+  rulesChannelId: "",
   modmailGuildId: "",
   modmailCategoryId: "",
   modmailPanelChannelId: "",
-  modmailIntroText: "Welcome to ETC modmail. Press Open Modmail to start a modmail, send your message, and use ./close modmail when you are done.",
+  modmailIntroText: "Welcome to ETC modmail. Press Open Modmail to start a modmail, send your message, and use =close when you are done.",
   modmailOpenedText: "Your ETC modmail is now open. Send your message here and the staff team will receive it.",
   modmailClosedText: "Your ETC modmail has been closed. If you need help again, press Open Modmail to reopen it.",
   welcomeJoinChannelId: "",
@@ -423,6 +424,10 @@ function renderAdmin(role, message = "", state = { config: fallbackConfig, stats
           <label for="noPingStaffRoleId">Staff Role ID (No-Ping Protection)</label>
           <input id="noPingStaffRoleId" name="noPingStaffRoleId" value="${escapeHtml(config.noPingStaffRoleId)}" placeholder="Discord role ID to protect">
         </div>
+        <div class="form-group">
+          <label for="rulesChannelId">Rules Channel ID</label>
+          <input id="rulesChannelId" name="rulesChannelId" value="${escapeHtml(config.rulesChannelId)}" placeholder="Channel ID for /rules and =rules">
+        </div>
         <button type="submit">💾 Save Bot Settings</button>
       </div>
     </form>
@@ -718,7 +723,8 @@ export default async function handler(req, res) {
           activityText: form.activityText?.trim() || fallbackConfig.activityText,
           statusReply: form.statusReply?.trim() || fallbackConfig.statusReply,
           pingReply: form.pingReply?.trim() || fallbackConfig.pingReply,
-          noPingStaffRoleId: form.noPingStaffRoleId?.trim() || ""
+          noPingStaffRoleId: form.noPingStaffRoleId?.trim() || "",
+          rulesChannelId: form.rulesChannelId?.trim() || ""
         });
         sendHtml(res, 200, renderAdmin(session.role, "Bot settings saved to the Wispbyte bot.", await loadPanelState()));
         return;
