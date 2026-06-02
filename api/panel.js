@@ -5,7 +5,7 @@ const ownerPassword = process.env.OWNER_PASSWORD || panelPassword;
 const adminPassword = process.env.ADMIN_PASSWORD || "etc-admin";
 const cookieSecret = process.env.COOKIE_SECRET || ownerPassword || panelPassword;
 const maxAgeSeconds = 60 * 60 * 12;
-const botApiUrl = process.env.BOT_API_URL || process.env.WISPBYTE_BOT_API_URL || "";
+const botApiUrl = process.env.BOT_API_URL || process.env.WISPBYTE_BOT_API_URL || (process.env.NODE_ENV !== "production" ? "http://localhost:10001" : "");
 const botApiSecret = process.env.BOT_API_SECRET || process.env.PANEL_API_SECRET || "";
 
 const fallbackConfig = {
@@ -13,10 +13,11 @@ const fallbackConfig = {
   statusReply: "ETC bot is online and ready.",
   pingReply: "Pong! {ping}ms",
   noPingStaffRoleId: "",
+  rulesChannelId: "",
   modmailGuildId: "",
   modmailCategoryId: "",
   modmailPanelChannelId: "",
-  modmailIntroText: "Welcome to ETC modmail. Press Open Modmail to start a modmail, send your message, and use ./close modmail when you are done.",
+  modmailIntroText: "Welcome to ETC modmail. Press Open Modmail to start a modmail, send your message, and use =close when you are done.",
   modmailOpenedText: "Your ETC modmail is now open. Send your message here and the staff team will receive it.",
   modmailClosedText: "Your ETC modmail has been closed. If you need help again, press Open Modmail to reopen it.",
   welcomeJoinChannelId: "",
@@ -143,189 +144,278 @@ function page(title, body) {
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     body { 
-      background: linear-gradient(135deg, #0a0a0f 0%, #121219 50%, #0f0f17 100%); 
-      color: #f7f1e8; 
-      font-family: 'Manrope', sans-serif; 
-      min-height: 100vh; 
-      padding: 20px;
+      background: radial-gradient(circle at top, rgba(31, 242, 210, 0.12), transparent 25%),
+                  radial-gradient(circle at bottom right, rgba(36, 134, 255, 0.08), transparent 20%),
+                  #07080f;
+      color: #e8eef2;
+      font-family: 'Manrope', sans-serif;
+      min-height: 100vh;
+      padding: 24px;
     }
     main { 
-      max-width: 1200px; 
+      max-width: 1360px;
       margin: 0 auto;
-      background: rgba(20, 21, 30, 0.85);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(31, 242, 210, 0.15);
-      border-radius: 16px;
-      padding: 40px;
-      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(31, 242, 210, 0.1);
+      min-height: calc(100vh - 48px);
     }
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 32px;
-      padding-bottom: 24px;
-      border-bottom: 2px solid rgba(31, 242, 210, 0.2);
+    .panel-shell {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 24px;
     }
-    h1 { 
-      font-size: 2.5rem; 
+    .sidebar {
+      position: sticky;
+      top: 24px;
+      align-self: start;
+      background: rgba(14, 18, 33, 0.92);
+      border: 1px solid rgba(31, 242, 210, 0.12);
+      border-radius: 28px;
+      padding: 28px 22px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+    }
+    .brand-short {
+      color: #7bf8e1;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      font-size: 0.8rem;
       font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: #1ff2d2;
-      font-family: 'Rajdhani', sans-serif;
+      margin-bottom: 14px;
     }
-    .header-right {
+    .brand-title {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1.05;
+      margin-bottom: 14px;
+      letter-spacing: 0.05em;
+      color: #e8fff7;
+    }
+    .brand-copy {
+      color: #aacbce;
+      line-height: 1.75;
+      font-size: 0.95rem;
+      margin-bottom: 26px;
+    }
+    .nav-list {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 26px;
+    }
+    .nav-item {
       display: flex;
-      align-items: center;
+      justify-content: space-between;
       gap: 16px;
-    }
-    .role-badge {
-      background: rgba(31, 242, 210, 0.2);
-      border: 1px solid rgba(31, 242, 210, 0.5);
-      color: #1ff2d2;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 0.9rem;
+      align-items: center;
+      padding: 16px 18px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 18px;
+      color: #c1dce1;
+      text-decoration: none;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
     }
-    .message { 
-      padding: 16px 20px;
-      border-radius: 12px;
+    .nav-item:hover {
+      transform: translateX(4px);
+      border-color: rgba(31, 242, 210, 0.25);
+      background: rgba(31, 242, 210, 0.06);
+    }
+    .nav-item.active {
+      border-color: #1ff2d2;
+      background: rgba(31, 242, 210, 0.14);
+      color: #ffffff;
+    }
+    .logout-row {
+      display: flex;
+      justify-content: center;
+      margin-top: 14px;
+    }
+    .logout-row button {
+      width: 100%;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #e8eef2;
+      padding: 14px 0;
+      border-radius: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .panel-main {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .hero-panel {
+      background: rgba(11, 16, 28, 0.94);
+      border: 1px solid rgba(31, 242, 210, 0.14);
+      border-radius: 28px;
+      padding: 32px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
       margin-bottom: 20px;
-      font-weight: 500;
     }
-    .message.success {
-      background: rgba(88, 255, 135, 0.1);
-      border-left: 4px solid #58ff87;
-      color: #58ff87;
+    .hero-copy h1 {
+      font-size: clamp(2.2rem, 1.8vw, 3rem);
+      margin-bottom: 14px;
+      line-height: 1.05;
+      letter-spacing: 0.06em;
+      color: #c9fff4;
     }
-    .message.error {
-      background: rgba(255, 77, 93, 0.1);
-      border-left: 4px solid #ff4d5d;
-      color: #ff4d5d;
+    .hero-copy p {
+      color: #a6c9cf;
+      line-height: 1.8;
+      max-width: 760px;
+      font-size: 1rem;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .hero-actions a button {
+      min-width: 180px;
+      padding: 14px 18px;
+      border-radius: 16px;
+      border: none;
+      background: linear-gradient(135deg, #1ff2d2, #12b6a9);
+      color: #06100f;
+    }
+    .hero-actions a button.outline {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.14);
+      color: #e8eef2;
     }
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 16px;
-      margin-bottom: 32px;
+      margin-top: 22px;
     }
     .stat-card {
-      background: rgba(31, 242, 210, 0.05);
-      border: 1px solid rgba(31, 242, 210, 0.2);
-      border-radius: 12px;
       padding: 20px;
-      text-align: center;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(31, 242, 210, 0.04));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      min-height: 126px;
     }
-    .stat-value {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: #1ff2d2;
-      margin-bottom: 6px;
-    }
-    .stat-label {
-      font-size: 0.9rem;
-      color: #a8a8a8;
+    .stat-card strong {
+      display: block;
+      font-size: 0.85rem;
+      color: #bccdd2;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.12em;
+      margin-bottom: 12px;
+    }
+    .stat-card .stat-value {
+      font-size: 1.7rem;
+      color: #e9fff6;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      background: rgba(31, 242, 210, 0.14);
+      border-radius: 999px;
+      border: 1px solid rgba(31, 242, 210, 0.22);
+      color: #c8fff3;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      background: #1ff2d2;
+      border-radius: 50%;
+      box-shadow: 0 0 0 8px rgba(31, 242, 210, 0.12);
+    }
+    .section-panel {
+      background: rgba(12, 16, 28, 0.94);
+      border: 1px solid rgba(31, 242, 210, 0.1);
+      border-radius: 24px;
+      padding: 28px;
+    }
+    .section-panel h2 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      color: #d8ffef;
+    }
+    .section-panel p {
+      color: #97b1b7;
+      line-height: 1.8;
+      margin-bottom: 22px;
+    }
+    .section-panel .section-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
     }
     .form-section {
       background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(31, 242, 210, 0.1);
-      border-radius: 12px;
+      border: 1px solid rgba(31, 242, 210, 0.08);
+      border-radius: 20px;
       padding: 24px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
     .form-section-title {
-      font-size: 1.3rem;
+      font-size: 1.1rem;
       font-weight: 700;
-      color: #1ff2d2;
+      color: #a9fff0;
       margin-bottom: 20px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-    .form-group {
-      margin-bottom: 20px;
-    }
-    label { 
-      display: block; 
-      margin-bottom: 8px; 
-      font-weight: 600;
-      text-transform: uppercase;
       letter-spacing: 0.08em;
-      font-size: 0.9rem;
-      color: #e8e8e8;
-    }
-    input, select, textarea { 
-      width: 100%;
-      padding: 12px 16px;
-      border: 1px solid rgba(31, 242, 210, 0.2);
-      border-radius: 8px;
-      background: rgba(25, 26, 35, 0.8);
-      color: #f7f1e8;
-      font-size: 1rem;
-      font-family: 'Manrope', sans-serif;
-      transition: all 0.3s ease;
-    }
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: #1ff2d2;
-      background: rgba(31, 242, 210, 0.05);
-      box-shadow: 0 0 0 3px rgba(31, 242, 210, 0.1);
-    }
-    textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-    button, a.button { 
-      display: inline-block;
-      padding: 12px 28px;
-      border: 0;
-      border-radius: 8px;
-      background: linear-gradient(135deg, #1ff2d2, #00d9b3);
-      color: #06100f;
-      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
-      text-decoration: none;
-      cursor: pointer;
+    }
+    .form-group { margin-bottom: 18px; }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #c7d9df;
       font-size: 0.95rem;
-      transition: all 0.3s ease;
-      font-family: 'Rajdhani', sans-serif;
+      letter-spacing: 0.04em;
+      font-weight: 600;
     }
-    button:hover, a.button:hover { 
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(31, 242, 210, 0.3);
+    input, select, textarea {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(8, 12, 22, 0.95);
+      color: #ebf8fa;
+      font-size: 1rem;
     }
-    button:active, a.button:active {
-      transform: translateY(0);
+    textarea { min-height: 110px; resize: vertical; }
+    .hint {
+      color: #7ea8af;
+      font-size: 0.92rem;
     }
-    .button.ghost { 
-      background: transparent;
-      color: #f7f1e8;
-      border: 1px solid rgba(31, 242, 210, 0.3);
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 20px;
     }
-    .button.ghost:hover {
-      background: rgba(31, 242, 210, 0.1);
-      border-color: #1ff2d2;
+    .buttons button { min-width: 160px; }
+    .message { margin-bottom: 20px; }
+    @media (max-width: 1080px) {
+      .panel-shell { grid-template-columns: 1fr; }
+      .sidebar { position: relative; top: 0; }
+      .stats-grid, .section-panel .section-grid { grid-template-columns: 1fr; }
+      .hero-top { flex-direction: column; }
+      .hero-actions { justify-content: stretch; }
     }
-    .row { 
-      display: flex; 
-      flex-wrap: wrap; 
-      gap: 16px; 
-      align-items: center;
-      margin-top: 24px;
-    }
-    @media (max-width: 768px) {
-      main { padding: 24px; }
-      h1 { font-size: 1.8rem; }
-      header { flex-direction: column; align-items: flex-start; gap: 12px; }
-      .header-right { width: 100%; justify-content: space-between; }
-      .stats-grid { grid-template-columns: 1fr 1fr; }
+    @media (max-width: 720px) {
+      body { padding: 16px; }
+      .sidebar { padding: 24px; }
+      .hero-panel, .section-panel { padding: 24px; }
     }
   </style>
 </head>
@@ -336,275 +426,193 @@ function page(title, body) {
 function renderLogin(message = "", selectedRole = "admin") {
   const role = ["guest", "admin", "owner"].includes(selectedRole) ? selectedRole : "admin";
   return page("ETC Bot Login", `<main>
-    <header>
-      <div>
-        <h1>🔐 ETC Login</h1>
-        <p style="margin-top: 8px; color: #a8a8a8;">Access the EU Tuning Crew bot control panel</p>
-      </div>
-    </header>
-    ${message ? `<div class="message error">${escapeHtml(message)}</div>` : ""}
-    <form method="post" action="/api/panel?panelPath=/login">
-      <div class="form-section">
-        <div class="form-group">
-          <label for="role">Select Role</label>
-          <select id="role" name="role">
-            <option value="admin"${role === "admin" ? " selected" : ""}>Admin Access</option>
-            <option value="owner"${role === "owner" ? " selected" : ""}>Owner Access</option>
-          </select>
+    <div class="panel-shell">
+      <aside class="sidebar">
+        <div class="brand-short">ETC Bot Panel</div>
+        <div class="brand-title">StartIT Login</div>
+        <div class="brand-copy">Sign in to manage the EU Tuning Crew bot, or continue as a guest to view the public website.</div>
+      </aside>
+      <section class="panel-main">
+        <div class="hero-panel">
+          <div class="hero-copy">
+            <h1>Welcome back</h1>
+            <p>Use Admin or Owner access to open the control center and configure bot replies, modmail, tickets, and features.</p>
+          </div>
+          ${message ? `<div class="message error">${escapeHtml(message)}</div>` : ""}
+          <form method="post" action="/api/panel?panelPath=/login">
+            <div class="form-section">
+              <div class="form-group">
+                <label for="role">Login Mode</label>
+                <select id="role" name="role">
+                  <option value="admin"${role === "admin" ? " selected" : ""}>Admin Access</option>
+                  <option value="owner"${role === "owner" ? " selected" : ""}>Owner Access</option>
+                  <option value="guest"${role === "guest" ? " selected" : ""}>Guest Mode</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="password">Access Code</label>
+                <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your access code" ${role === "guest" ? "" : "required"}>
+                <div class="hint">${role === "owner" ? "Owner access allows full panel control." : role === "admin" ? "Admin access allows bot settings and features." : "Guest mode opens the public site view."}</div>
+              </div>
+              <div class="buttons">
+                <button type="submit">${role === "guest" ? "Continue as guest" : `Login as ${role}`}</button>
+                <a class="button ghost" href="/?fromPanel=1">Back to site</a>
+              </div>
+            </div>
+          </form>
         </div>
-        <div class="form-group">
-          <label for="password">Access Code</label>
-          <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your access code" required>
-        </div>
-        <div class="row">
-          <button type="submit">Login to Panel</button>
-          <a class="button ghost" href="/?fromPanel=1">Back to Site</a>
-        </div>
-      </div>
-    </form>
+      </section>
+    </div>
   </main>`);
 }
 
 function renderAdmin(role, message = "", state = { config: fallbackConfig, stats: {} }) {
   const config = { ...fallbackConfig, ...(state.config || {}) };
   const stats = state.stats || {};
+  const isOwnerRole = role === "owner";
+
   return page("ETC Bot Panel", `<main>
-    <header>
-      <div>
-        <h1>⚙️ Bot Control Panel</h1>
-        <p style="margin-top: 8px; color: #a8a8a8;">EU Tuning Crew Discord Bot Management</p>
-      </div>
-      <div class="header-right">
-        <div class="role-badge">👤 ${escapeHtml(role).toUpperCase()}</div>
-        <form method="post" action="/api/panel?panelPath=/logout" style="margin: 0;">
-          <button class="ghost" type="submit" style="padding: 8px 16px; font-size: 0.85rem;">Logout</button>
-        </form>
-      </div>
-    </header>
+    <div class="panel-shell">
+      <aside class="sidebar">
+        <div class="brand-short">ETC Bot Panel</div>
+        <div class="brand-title">StartIT Style Panel</div>
+        <div class="brand-copy">A clean, menu-driven view for bot analytics, settings, modmail, and advanced controls.</div>
 
-    ${message ? `<div class="message success">✓ ${escapeHtml(message)}</div>` : ""}
-    ${state.error ? `<div class="message error">✗ Wispbyte API: ${escapeHtml(state.error)}</div>` : ""}
+        <nav class="nav-list">
+          <a class="nav-item active" href="#overview">Overview<span>01</span></a>
+          <a class="nav-item" href="#bot-settings">Bot Settings<span>02</span></a>
+          <a class="nav-item" href="#modmail">Modmail<span>03</span></a>
+          <a class="nav-item" href="#features">Features<span>04</span></a>
+          ${isOwnerRole ? `<a class="nav-item" href="#access">Access<span>05</span></a>` : ""}
+          <a class="nav-item" href="/?fromPanel=1">Website<span>WEB</span></a>
+        </nav>
 
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-value">${escapeHtml(stats.botTag || "Unknown")}</div>
-        <div class="stat-label">Bot Status</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">${escapeHtml(stats.guilds ?? 0)}</div>
-        <div class="stat-label">Servers</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">${escapeHtml(stats.openTickets ?? 0)}</div>
-        <div class="stat-label">Open Modmail</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">${escapeHtml(stats.discordMode || "Unknown")}</div>
-        <div class="stat-label">Mode</div>
-      </div>
-    </div>
+        <div class="logout-row">
+          <form method="post" action="/api/panel?panelPath=/logout" style="width:100%;">
+            <button type="submit">Log out</button>
+          </form>
+        </div>
+      </aside>
 
-    <form method="post" action="/api/panel?panelPath=/admin/save-bot">
-      <div class="form-section">
-        <div class="form-section-title">🎮 Bot Settings</div>
-        <div class="form-group">
-          <label for="activityText">Bot Activity Text</label>
-          <input id="activityText" name="activityText" value="${escapeHtml(config.activityText)}" required placeholder="What the bot shows as activity">
-        </div>
-        <div class="form-group">
-          <label for="statusReply">/status Command Reply</label>
-          <input id="statusReply" name="statusReply" value="${escapeHtml(config.statusReply)}" required placeholder="Response to /status command">
-        </div>
-        <div class="form-group">
-          <label for="pingReply">/ping Command Reply</label>
-          <input id="pingReply" name="pingReply" value="${escapeHtml(config.pingReply)}" required placeholder="Use {ping} for latency value">
-        </div>
-        <div class="form-group">
-          <label for="noPingStaffRoleId">Staff Role ID (No-Ping Protection)</label>
-          <input id="noPingStaffRoleId" name="noPingStaffRoleId" value="${escapeHtml(config.noPingStaffRoleId)}" placeholder="Discord role ID to protect">
-        </div>
-        <button type="submit">💾 Save Bot Settings</button>
-      </div>
-    </form>
-
-    <form method="post" action="/api/panel?panelPath=/admin/save-modmail">
-      <div class="form-section">
-        <div class="form-section-title">📬 Modmail Configuration</div>
-        <div class="form-group">
-          <label for="modmailGuildId">Modmail Server ID</label>
-          <input id="modmailGuildId" name="modmailGuildId" value="${escapeHtml(config.modmailGuildId)}" placeholder="Discord server ID for modmail channels">
-        </div>
-        <div class="form-group">
-          <label for="modmailCategoryId">Modmail Category ID</label>
-          <input id="modmailCategoryId" name="modmailCategoryId" value="${escapeHtml(config.modmailCategoryId)}" placeholder="Category to create modmail channels in">
-        </div>
-        <div class="form-group">
-          <label for="modmailPanelChannelId">Modmail Panel Channel ID</label>
-          <input id="modmailPanelChannelId" name="modmailPanelChannelId" value="${escapeHtml(config.modmailPanelChannelId)}" placeholder="Channel where modmail button appears">
-        </div>
-        <div class="form-group">
-          <label for="modmailIntroText">Modmail Intro Text</label>
-          <textarea id="modmailIntroText" name="modmailIntroText" placeholder="Welcome message for modmail">${escapeHtml(config.modmailIntroText)}</textarea>
-        </div>
-        <div class="form-group">
-          <label for="modmailOpenedText">Modmail Opened Reply</label>
-          <textarea id="modmailOpenedText" name="modmailOpenedText" placeholder="Message when modmail opens">${escapeHtml(config.modmailOpenedText)}</textarea>
-        </div>
-        <div class="form-group">
-          <label for="modmailClosedText">Modmail Closed Reply</label>
-          <textarea id="modmailClosedText" name="modmailClosedText" placeholder="Message when modmail closes">${escapeHtml(config.modmailClosedText)}</textarea>
-        </div>
-        <button type="submit">💾 Save Modmail Settings</button>
-      </div>
-    </form>
-
-    <form method="post" action="/api/panel?panelPath=/admin/save-features">
-      <div class="form-section">
-        <div class="form-section-title">🎫 Ticket System</div>
-        <div class="form-group">
-          <label>
-            <input type="checkbox" name="ticketSystemEnabled" ${config.ticketSystemEnabled ? "checked" : ""} style="width: auto; margin-right: 10px;">
-            Enable Ticket System
-          </label>
-        </div>
-        <div class="form-group">
-          <label for="ticketCategoryId">Ticket Category ID</label>
-          <input id="ticketCategoryId" name="ticketCategoryId" value="${escapeHtml(config.ticketCategoryId)}" placeholder="Category where ticket channels are created">
-        </div>
-        <div class="form-group">
-          <label for="ticketPanelChannelId">Ticket Panel Channel ID</label>
-          <input id="ticketPanelChannelId" name="ticketPanelChannelId" value="${escapeHtml(config.ticketPanelChannelId)}" placeholder="Channel where ticket button appears">
-        </div>
-        <div class="form-group">
-          <label for="ticketIntroText">Ticket Panel Text</label>
-          <textarea id="ticketIntroText" name="ticketIntroText" placeholder="Text shown above ticket button">${escapeHtml(config.ticketIntroText)}</textarea>
-        </div>
-      </div>
-    </form>
-
-    <form method="post" action="/api/panel?panelPath=/admin/save-features">
-      <div class="form-section">
-        <div class="form-section-title">🛡️ Auto-Moderation Settings</div>
-        <div class="form-group">
-          <label>
-            <input type="checkbox" name="autoModEnabled" ${config.autoModEnabled ? "checked" : ""} style="width: auto; margin-right: 10px;">
-            Enable Auto-Moderation
-          </label>
-        </div>
-        <div class="form-group">
-          <label>
-            <input type="checkbox" name="spamFilterEnabled" ${config.spamFilterEnabled ? "checked" : ""} style="width: auto; margin-right: 10px;">
-            Enable Spam Filter
-          </label>
-        </div>
-        <div class="form-group">
-          <label for="spamThreshold">Spam Threshold (messages per 5s)</label>
-          <input id="spamThreshold" name="spamThreshold" type="number" value="${escapeHtml(config.spamThreshold)}" min="1" max="20">
-        </div>
-        <div class="form-group">
-          <label>
-            <input type="checkbox" name="capsFilterEnabled" ${config.capsFilterEnabled ? "checked" : ""} style="width: auto; margin-right: 10px;">
-            Enable Caps Filter (auto-delete excessive caps)
-          </label>
-        </div>
-        <div class="form-group">
-          <label>
-            <input type="checkbox" name="profanityFilterEnabled" ${config.profanityFilterEnabled ? "checked" : ""} style="width: auto; margin-right: 10px;">
-            Enable Profanity Filter
-          </label>
-        </div>
-        <div class="form-group">
-          <label>
-            <input type="checkbox" name="inviteFilterEnabled" ${config.inviteFilterEnabled ? "checked" : ""} style="width: auto; margin-right: 10px;">
-            Enable Invite Filter
-          </label>
-        </div>
-        <button type="submit">💾 Save Auto-Moderation</button>
-      </div>
-    </form>
-
-    <form method="post" action="/api/panel?panelPath=/admin/save-features">
-      <div class="form-section">
-        <div class="form-section-title">📊 Advanced Features</div>
-        
-        <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid rgba(31, 242, 210, 0.1);">
-          <h3 style="color: #1ff2d2; margin: 0 0 12px; font-size: 1.05rem;">👥 Member Tracking</h3>
-          <div class="form-group">
-            <label>
-              <input type="checkbox" name="memberTrackingEnabled" ${config.memberTrackingEnabled ? "checked" : ""} style="width: auto; margin-right: 10px;">
-              Enable Member Tracking (joins/leaves)
-            </label>
+      <section class="panel-main">
+        <div class="hero-panel">
+          <div class="hero-top">
+            <div class="hero-copy">
+              <h1>ETC Bot Control Panel</h1>
+              <p>Manage bot behavior and server integrations from one place. If the bot status shows an error, check the BOT_API_URL or local panel connection.</p>
+            </div>
+            <div class="status-pill"><span class="status-dot"></span> ${escapeHtml(stats.discordMode || "Waiting")}</div>
           </div>
-          <div class="form-group">
-            <label for="memberLogChannelId">Member Log Channel ID</label>
-            <input id="memberLogChannelId" name="memberLogChannelId" value="${escapeHtml(config.memberLogChannelId)}" placeholder="Channel for member join/leave logs">
+          ${message ? `<div class="message success">✓ ${escapeHtml(message)}</div>` : ""}
+          ${state.error ? `<div class="message error">✗ ${escapeHtml(state.error)}</div>` : ""}
+          <div class="hero-actions">
+            <a href="#bot-settings"><button type="button">Open Bot Settings</button></a>
+            <a href="#modmail"><button class="outline" type="button">Open Modmail</button></a>
+            <a href="#features"><button class="ghost" type="button">Open Features</button></a>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card"><strong>Bot Tag</strong><div class="stat-value">${escapeHtml(stats.botTag || "Unknown")}</div></div>
+            <div class="stat-card"><strong>Guilds</strong><div class="stat-value">${escapeHtml(stats.guilds ?? 0)}</div></div>
+            <div class="stat-card"><strong>Open Modmail</strong><div class="stat-value">${escapeHtml(stats.openTickets ?? 0)}</div></div>
+            <div class="stat-card"><strong>Mode</strong><div class="stat-value">${escapeHtml(stats.discordMode || "Unknown")}</div></div>
           </div>
         </div>
 
-        <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid rgba(31, 242, 210, 0.1);">
-          <h3 style="color: #1ff2d2; margin: 0 0 12px; font-size: 1.05rem;">⭐ Leveling System</h3>
-          <div class="form-group">
-            <label>
-              <input type="checkbox" name="levelingEnabled" ${config.levelingEnabled ? "checked" : ""} style="width: auto; margin-right: 10px;">
-              Enable Leveling System
-            </label>
-          </div>
-          <div class="form-group">
-            <label for="levelAnnouncementChannelId">Level Up Announcement Channel ID</label>
-            <input id="levelAnnouncementChannelId" name="levelAnnouncementChannelId" value="${escapeHtml(config.levelAnnouncementChannelId)}" placeholder="Channel for level up announcements">
-          </div>
-        </div>
+        <section id="overview" class="section-panel">
+          <h2>Overview</h2>
+          <p>Use this panel to view bot connectivity and push settings directly to the Wispbyte bot API. Local development automatically tries localhost:10001 when no BOT_API_URL is configured.</p>
+        </section>
 
-        <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid rgba(31, 242, 210, 0.1);">
-          <h3 style="color: #1ff2d2; margin: 0 0 12px; font-size: 1.05rem;">📝 Message Logging</h3>
-          <div class="form-group">
-            <label>
-              <input type="checkbox" name="messageLoggingEnabled" ${config.messageLoggingEnabled ? "checked" : ""} style="width: auto; margin-right: 10px;">
-              Enable Message Logging (edited/deleted messages)
-            </label>
-          </div>
-          <div class="form-group">
-            <label for="messageLogChannelId">Message Log Channel ID</label>
-            <input id="messageLogChannelId" name="messageLogChannelId" value="${escapeHtml(config.messageLogChannelId)}" placeholder="Channel for message logs">
-          </div>
-        </div>
+        <section id="bot-settings" class="section-panel">
+          <h2>Bot Settings</h2>
+          <form method="post" action="/api/panel?panelPath=/admin/save-bot">
+            <div class="form-section">
+              <div class="form-section-title">Basic Bot Configuration</div>
+              <div class="form-group">
+                <label for="activityText">Bot Activity Text</label>
+                <input id="activityText" name="activityText" value="${escapeHtml(config.activityText)}" required placeholder="What the bot shows as activity">
+              </div>
+              <div class="form-group">
+                <label for="statusReply">/status Command Reply</label>
+                <input id="statusReply" name="statusReply" value="${escapeHtml(config.statusReply)}" required placeholder="Response to /status command">
+              </div>
+              <div class="form-group">
+                <label for="pingReply">/ping Command Reply</label>
+                <input id="pingReply" name="pingReply" value="${escapeHtml(config.pingReply)}" required placeholder="Response to /ping command">
+              </div>
+              <div class="form-group">
+                <label for="noPingStaffRoleId">No-Ping Staff Role ID</label>
+                <input id="noPingStaffRoleId" name="noPingStaffRoleId" value="${escapeHtml(config.noPingStaffRoleId)}" placeholder="Optional role ID">
+              </div>
+              <div class="form-group">
+                <label for="rulesChannelId">Rules Channel ID</label>
+                <input id="rulesChannelId" name="rulesChannelId" value="${escapeHtml(config.rulesChannelId)}" placeholder="Optional rules channel ID">
+              </div>
+              <div class="buttons"><button type="submit">Save Bot Settings</button></div>
+            </div>
+          </form>
+        </section>
 
-        <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid rgba(31, 242, 210, 0.1);">
-          <h3 style="color: #1ff2d2; margin: 0 0 12px; font-size: 1.05rem;">🎯 Reaction Roles</h3>
-          <div class="form-group">
-            <label>
-              <input type="checkbox" name="reactionRolesEnabled" ${config.reactionRolesEnabled ? "checked" : ""} style="width: auto; margin-right: 10px;">
-              Enable Reaction Roles (auto-assign roles via emoji)
-            </label>
-          </div>
-        </div>
+        <section id="modmail" class="section-panel">
+          <h2>Modmail</h2>
+          <form method="post" action="/api/panel?panelPath=/admin/save-modmail">
+            <div class="form-section">
+              <div class="form-section-title">Modmail Configuration</div>
+              <div class="form-group">
+                <label for="modmailGuildId">Modmail Guild ID</label>
+                <input id="modmailGuildId" name="modmailGuildId" value="${escapeHtml(config.modmailGuildId)}" placeholder="Guild ID for modmail">
+              </div>
+              <div class="form-group">
+                <label for="modmailCategoryId">Modmail Category ID</label>
+                <input id="modmailCategoryId" name="modmailCategoryId" value="${escapeHtml(config.modmailCategoryId)}" placeholder="Optional channel category ID">
+              </div>
+              <div class="form-group">
+                <label for="modmailPanelChannelId">Modmail Panel Channel ID</label>
+                <input id="modmailPanelChannelId" name="modmailPanelChannelId" value="${escapeHtml(config.modmailPanelChannelId)}" placeholder="Optional panel channel ID">
+              </div>
+              <div class="form-group">
+                <label for="modmailIntroText">Modmail Intro Text</label>
+                <textarea id="modmailIntroText" name="modmailIntroText" placeholder="Intro text for modmail">${escapeHtml(config.modmailIntroText)}</textarea>
+              </div>
+              <div class="buttons"><button type="submit">Save Modmail Settings</button></div>
+            </div>
+          </form>
+        </section>
 
-        <div style="margin-bottom: 0;">
-          <h3 style="color: #1ff2d2; margin: 0 0 12px; font-size: 1.05rem;">🗳️ Voting/Polls</h3>
-          <div class="form-group">
-            <label>
-              <input type="checkbox" name="votingEnabled" ${config.votingEnabled ? "checked" : ""} style="width: auto; margin-right: 10px;">
-              Enable Voting System
-            </label>
-          </div>
-        </div>
+        <section id="features" class="section-panel">
+          <h2>Advanced Features</h2>
+          <form method="post" action="/api/panel?panelPath=/admin/save-features">
+            <div class="form-section">
+              <div class="form-section-title">Feature Toggles</div>
+              <div class="form-group">
+                <label><input type="checkbox" name="ticketSystemEnabled"${config.ticketSystemEnabled ? " checked" : ""}> Ticket System Enabled</label>
+              </div>
+              <div class="form-group">
+                <label><input type="checkbox" name="autoModEnabled"${config.autoModEnabled ? " checked" : ""}> Auto-Moderation Enabled</label>
+              </div>
+              <div class="form-group">
+                <label><input type="checkbox" name="memberTrackingEnabled"${config.memberTrackingEnabled ? " checked" : ""}> Member Tracking Enabled</label>
+              </div>
+              <div class="form-group">
+                <label><input type="checkbox" name="levelingEnabled"${config.levelingEnabled ? " checked" : ""}> Leveling Enabled</label>
+              </div>
+              <div class="form-group">
+                <label><input type="checkbox" name="messageLoggingEnabled"${config.messageLoggingEnabled ? " checked" : ""}> Message Logging Enabled</label>
+              </div>
+              <div class="form-group">
+                <label><input type="checkbox" name="reactionRolesEnabled"${config.reactionRolesEnabled ? " checked" : ""}> Reaction Roles Enabled</label>
+              </div>
+              <div class="form-group">
+                <label><input type="checkbox" name="votingEnabled"${config.votingEnabled ? " checked" : ""}> Voting Enabled</label>
+              </div>
+              <div class="buttons"><button type="submit">Save Feature Settings</button></div>
+            </div>
+          </form>
+        </section>
 
-        <button type="submit" style="margin-top: 24px;">💾 Save Advanced Features</button>
-      </div>
-    </form>
-
-    ${role === "owner" ? `<form method="post" action="/api/panel?panelPath=/admin/save-access">
-      <div class="form-section" style="border-color: rgba(255, 77, 93, 0.2);">
-        <div class="form-section-title" style="color: #ff4d5d;">🔐 Access Control (Owner Only)</div>
-        <p style="color: #a8a8a8; margin-bottom: 20px;">⚠️ Change passwords in Vercel Environment Variables, then redeploy the bot.</p>
-        <div class="message error">🔒 Passwords are managed through Vercel for security. This form is for reference only.</div>
-        <button type="submit" disabled style="opacity: 0.5; cursor: not-allowed;">Passwords are managed in Vercel</button>
-      </div>
-    </form>` : ""}
-
-    <div class="row" style="margin-top: 32px; border-top: 1px solid rgba(31, 242, 210, 0.1); padding-top: 24px;">
-      <a class="button" href="/?fromPanel=1">🌐 Back to Website</a>
-      <a class="button ghost" href="https://discord.com/developers/applications" target="_blank">Discord Developer Portal</a>
+        ${isOwnerRole ? `<section id="access" class="section-panel"><h2>Access</h2><p>Owner-only controls for panel access and security tuning are managed through environment variables. Update Vercel variables and redeploy when needed.</p></section>` : ""}
+      </section>
     </div>
   </main>`);
 }
@@ -615,7 +623,9 @@ function getPanelPath(req) {
 }
 
 async function callBotApi(path, init = {}) {
-  if (!botApiUrl) return null;
+  if (!botApiUrl) {
+    throw new Error("BOT_API_URL is not configured.");
+  }
 
   const response = await fetch(new URL(path, botApiUrl), {
     ...init,
@@ -718,7 +728,8 @@ export default async function handler(req, res) {
           activityText: form.activityText?.trim() || fallbackConfig.activityText,
           statusReply: form.statusReply?.trim() || fallbackConfig.statusReply,
           pingReply: form.pingReply?.trim() || fallbackConfig.pingReply,
-          noPingStaffRoleId: form.noPingStaffRoleId?.trim() || ""
+          noPingStaffRoleId: form.noPingStaffRoleId?.trim() || "",
+          rulesChannelId: form.rulesChannelId?.trim() || ""
         });
         sendHtml(res, 200, renderAdmin(session.role, "Bot settings saved to the Wispbyte bot.", await loadPanelState()));
         return;

@@ -34,6 +34,7 @@ const configPath = join(dataDir, "config.json");
 const ticketsPath = join(dataDir, "tickets.json");
 const warningsPath = join(dataDir, "warnings.json");
 const sessions = new Map();
+const modmailHomePrompted = new Set();
 const noPingMuteMs = 1000 * 60 * 60 * 3;
 
 const contentTypes = {
@@ -59,7 +60,8 @@ const defaultConfig = {
   modmailCategoryId: "",
   modmailPanelChannelId: "",
   noPingStaffRoleId: "",
-  modmailIntroText: "Welcome to ETC modmail. Press Open Modmail to start a modmail, send your message, and use ./close modmail when you are done.",
+  rulesChannelId: "",
+  modmailIntroText: "Welcome to ETC modmail. Press Open Modmail to start a modmail, send your message, and use =close when you are done.",
   modmailOpenedText: "Your ETC modmail is now open. Send your message here and the staff team will receive it.",
   modmailClosedText: "Your ETC modmail has been closed. If you need help again, press Open Modmail to reopen it.",
 
@@ -489,6 +491,68 @@ function renderTextChannelOptions(selectedChannelId = "") {
   ].join("");
 }
 
+function renderGuildOptions(selectedGuildId = "") {
+  const guilds = client.guilds.cache
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const selectedIsLoaded = guilds.some((guild) => guild.id === selectedGuildId);
+  const fallbackOption = selectedGuildId && !selectedIsLoaded
+    ? `<option value="${escapeHtml(selectedGuildId)}" selected>Saved guild (${escapeHtml(selectedGuildId)})</option>`
+    : "";
+
+  return [
+    `<option value="">Select a guild</option>`,
+    fallbackOption,
+    ...guilds.map((guild) =>
+      `<option value="${escapeHtml(guild.id)}"${guild.id === selectedGuildId ? " selected" : ""}>${escapeHtml(guild.name)}</option>`
+    )
+  ].join("");
+}
+
+function renderCategoryOptions(selectedCategoryId = "") {
+  const guild = getConfiguredGuildFromCache();
+  const categories = guild
+    ? [...guild.channels.cache.values()]
+        .filter((channel) => channel.type === ChannelType.GuildCategory)
+        .sort((a, b) => a.name.localeCompare(b.name))
+    : [];
+
+  const selectedIsLoaded = categories.some((category) => category.id === selectedCategoryId);
+  const fallbackOption = selectedCategoryId && !selectedIsLoaded
+    ? `<option value="${escapeHtml(selectedCategoryId)}" selected>Saved category (${escapeHtml(selectedCategoryId)})</option>`
+    : "";
+
+  return [
+    `<option value="">Select a category</option>`,
+    fallbackOption,
+    ...categories.map((category) =>
+      `<option value="${escapeHtml(category.id)}"${category.id === selectedCategoryId ? " selected" : ""}>${escapeHtml(category.name)}</option>`
+    )
+  ].join("");
+}
+
+function renderRoleOptions(selectedRoleId = "") {
+  const guild = getConfiguredGuildFromCache();
+  const roles = guild
+    ? [...guild.roles.cache.values()]
+        .filter((role) => role.id !== guild.id)
+        .sort((a, b) => b.position - a.position)
+    : [];
+
+  const selectedIsLoaded = roles.some((role) => role.id === selectedRoleId);
+  const fallbackOption = selectedRoleId && !selectedIsLoaded
+    ? `<option value="${escapeHtml(selectedRoleId)}" selected>Saved role (${escapeHtml(selectedRoleId)})</option>`
+    : "";
+
+  return [
+    `<option value="">Select a role</option>`,
+    fallbackOption,
+    ...roles.map((role) =>
+      `<option value="${escapeHtml(role.id)}"${role.id === selectedRoleId ? " selected" : ""}>@${escapeHtml(role.name)}</option>`
+    )
+  ].join("");
+}
+
 function formatMessageContent(message) {
   const parts = [];
   if (message.content?.trim()) {
@@ -499,6 +563,124 @@ function formatMessageContent(message) {
     parts.push(`Attachments:\n${attachmentLines.join("\n")}`);
   }
   return parts.join("\n\n").trim();
+}
+
+function parsePrefixCommand(message) {
+  const text = message.content.trim();
+  if (!text) return null;
+  if (text.startsWith("=")) {
+    return text.slice(1).trim().split(/\s+/);
+  }
+  if (text.startsWith("./")) {
+    return text.slice(2).trim().split(/\s+/);
+  }
+  return null;
+}
+
+function findRulesChannel(guild) {
+  if (!guild) return null;
+  if (botConfig.rulesChannelId) {
+    const configuredChannel = guild.channels.cache.get(botConfig.rulesChannelId);
+    if (configuredChannel?.isTextBased()) return configuredChannel;
+  }
+  return guild.channels.cache.find((channel) =>
+    channel.isTextBased() && /rules|reglas|normas|readme?/i.test(channel.name)
+  ) || null;
+}
+
+async function handleTextCommand(message, commandParts) {
+  const command = commandParts[0]?.toLowerCase();
+  const args = commandParts.slice(1);
+  if (!command) return false;
+
+  const guild = message.guild;
+  const channel = message.channel;
+
+  if (command === "help") {
+    await message.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle("ETC Help")
+          .setDescription("Use slash commands like /help, /rules, /info, and /modmail panel or text commands like =help, =rules, =info, and =close.")
+          .addFields(
+            { name: "Modmail", value: "DM the bot or use /modmail panel to post a modmail button.", inline: false },
+            { name: "Rules", value: "Use /rules or =rules to jump to the rules channel.", inline: false },
+            { name: "Close", value: "Use /close modmail or =close to close your support request.", inline: false }
+          )
+          .setColor(0x1ff2d2)
+      ]
+    });
+    return true;
+  }
+
+  if (command === "rules") {
+    const rulesChannel = findRulesChannel(guild);
+    if (rulesChannel) {
+      await message.reply({ content: `Please read the rules in ${rulesChannel}.` });
+    } else if (guild) {
+      await message.reply("Please ask staff for the rules channel or set rulesChannelId in the bot config.");
+    } else {
+      await message.reply("Use this command in your server to get the rules channel, or ask staff for help.");
+    }
+    return true;
+  }
+
+  if (command === "info") {
+    const queryType = args[0]?.toLowerCase() || "server";
+    const infoEmbed = new EmbedBuilder().setTitle("ETC Info").setColor(0x1ff2d2);
+
+    if (queryType === "bot") {
+      infoEmbed.setDescription(`Bot is online and ready. Latency: ${client.ws.ping}ms.`);
+      infoEmbed.addFields(
+        { name: "Panel Port", value: `${port}`, inline: true },
+        { name: "Modmail", value: isModmailConfigured() ? "Configured" : "Not configured", inline: true }
+      );
+    } else if (queryType === "etc") {
+      infoEmbed.setDescription("EU Tuning Crew support bot is here to help with modmail, logs, and server utilities.");
+    } else if (!guild) {
+      infoEmbed.setDescription("Use =info bot for bot details, or use this command in a server for server info.");
+    } else {
+      infoEmbed.setDescription(`${guild.name} has ${guild.memberCount || "unknown"} members.`);
+      const rulesChannel = findRulesChannel(guild);
+      if (rulesChannel) {
+        infoEmbed.addFields({ name: "Rules Channel", value: `${rulesChannel}`, inline: true });
+      }
+    }
+
+    await message.reply({ embeds: [infoEmbed] });
+    return true;
+  }
+
+  if (command === "status" || command === "ping") {
+    const reply = command === "ping"
+      ? botConfig.pingReply.replaceAll("{ping}", String(client.ws.ping))
+      : botConfig.statusReply;
+    await message.reply(reply);
+    return true;
+  }
+
+  if (command === "modmail") {
+    if (message.channel.type === ChannelType.DM) {
+      await sendModmailHome(message.author, "Press Open Modmail or send your message once a ticket is open.");
+      return true;
+    }
+    await message.reply("Use /modmail panel to post the modmail button in a channel, or DM me directly to start.");
+    return true;
+  }
+
+  if (command === "close") {
+    const ticket = getTicketByChannelId(message.channelId) || getTicketByUserId(message.author.id);
+    if (!ticket || ticket.status !== "open") {
+      await message.reply("You do not have an open modmail right now.");
+      return true;
+    }
+    const closedBy = message.channel.type === ChannelType.DM ? "user" : "staff";
+    await closeTicket(ticket, closedBy);
+    await message.reply("Closing modmail now.");
+    return true;
+  }
+
+  return false;
 }
 
 async function getProtectedStaffRole(message) {
@@ -606,13 +788,14 @@ async function sendModmailHome(user, notice = "") {
 
   const intro = new EmbedBuilder()
     .setTitle("ETC Modmail")
-    .setDescription(`${botConfig.modmailIntroText}\n\n${statusText}${notice ? `\n\n${notice}` : ""}`)
+    .setDescription(`${botConfig.modmailIntroText}\n\n${statusText}${notice ? `\n\n${notice}` : ""}\n\nClose with =close or ./close modmail.`)
     .setColor(0x1ff2d2);
 
   await user.send({
     embeds: [intro],
     components: [openTicketRow]
   });
+  modmailHomePrompted.add(user.id);
 }
 
 async function sendModmailPanel(channel) {
@@ -674,12 +857,13 @@ async function openTicketForUser(user) {
   };
   tickets[user.id] = ticket;
   await saveTickets();
+  modmailHomePrompted.delete(user.id);
 
   await channel.send({
     embeds: [
       new EmbedBuilder()
         .setTitle("New Modmail")
-        .setDescription(`Member: <@${user.id}>\nNickname: ${displayName}\nUser ID: ${user.id}\n\nClose this modmail with \`./close modmail\` or \`/close modmail\`.`)
+        .setDescription(`Member: <@${user.id}>\nNickname: ${displayName}\nUser ID: ${user.id}\n\nClose this modmail with \`=close\` or \`./close modmail\`.`)
         .setColor(0x1ff2d2)
     ]
   });
@@ -699,6 +883,7 @@ async function closeTicket(ticket, closedBy = "staff") {
       ? `${botConfig.modmailClosedText}\n\nYou closed this modmail.`
       : `${botConfig.modmailClosedText}\n\nThe ETC team closed this modmail.`;
     await user.send(closedNotice).catch(() => {});
+    modmailHomePrompted.delete(user.id);
     await sendModmailHome(user, "You can press Open Modmail any time if you need help again.").catch(() => {});
   }
 
@@ -1515,9 +1700,17 @@ function renderAdminPage(message = "", role = "admin") {
               <textarea id="pingReply" name="pingReply" required>${escapeHtml(botConfig.pingReply)}</textarea>
               <div class="hint">Use <code>{ping}</code> in the ping reply if you want the bot latency to appear automatically.</div>
 
-              <label for="noPingStaffRoleId">Staff role ID for no-ping warns</label>
-              <input id="noPingStaffRoleId" name="noPingStaffRoleId" value="${escapeHtml(botConfig.noPingStaffRoleId)}" placeholder="Discord Staff role ID">
-              <div class="hint">Only this role gets protected. If empty, the bot protects a role named <code>staff</code>.</div>
+              <label for="noPingStaffRoleId">Protected staff role for no-ping warns</label>
+              <select id="noPingStaffRoleId" name="noPingStaffRoleId">
+                ${renderRoleOptions(botConfig.noPingStaffRoleId)}
+              </select>
+              <div class="hint">The selected role is protected from no-ping warnings. If empty, the bot will fall back to a role named <code>staff</code>.</div>
+
+              <label for="rulesChannelId">Rules channel</label>
+              <select id="rulesChannelId" name="rulesChannelId">
+                ${renderTextChannelOptions(botConfig.rulesChannelId)}
+              </select>
+              <div class="hint">Choose the channel used by /rules and =rules commands.</div>
 
               <div class="buttons">
                 <button type="submit">Save bot settings</button>
@@ -1590,17 +1783,21 @@ function renderAdminPage(message = "", role = "admin") {
               <div class="status-pill"><span class="status-dot"></span> ${modmailReady}</div>
 
               <form method="post" action="/admin/save-modmail">
-                <label for="modmailGuildId">Modmail guild ID</label>
-                <input id="modmailGuildId" name="modmailGuildId" value="${escapeHtml(botConfig.modmailGuildId)}" placeholder="Discord server ID">
+                <label for="modmailGuildId">Modmail guild</label>
+                <select id="modmailGuildId" name="modmailGuildId">
+                  ${renderGuildOptions(botConfig.modmailGuildId)}
+                </select>
 
-                <label for="modmailCategoryId">Modmail category ID</label>
-                <input id="modmailCategoryId" name="modmailCategoryId" value="${escapeHtml(botConfig.modmailCategoryId)}" placeholder="Category ID for modmail channels">
+                <label for="modmailCategoryId">Modmail category</label>
+                <select id="modmailCategoryId" name="modmailCategoryId">
+                  ${renderCategoryOptions(botConfig.modmailCategoryId)}
+                </select>
 
                 <label for="modmailPanelChannelId">Modmail panel channel</label>
                 <select id="modmailPanelChannelId" name="modmailPanelChannelId">
                   ${renderTextChannelOptions(botConfig.modmailPanelChannelId)}
                 </select>
-                <div class="hint">Save this channel, then use <code>/modmail panel</code> in Discord to post the Open Modmail panel there. You can also pass a channel directly in the command.</div>
+                <div class="hint">Save this channel, then use <code>/modmail panel</code> in Discord to post the Open Modmail panel there.</div>
 
                 <label for="modmailIntroText">Modmail intro text</label>
                 <textarea id="modmailIntroText" name="modmailIntroText" required>${escapeHtml(botConfig.modmailIntroText)}</textarea>
@@ -1616,32 +1813,6 @@ function renderAdminPage(message = "", role = "admin") {
                   <a class="tab-button" href="#preview" data-tab-target="preview"><button class="ghost" type="button">See Preview</button></a>
                 </div>
               </form>
-              <div class="view-heading">
-                <div class="stack-card">
-                  <div class="section-note">Support</div>
-                  <h2>Modmail Setup</h2>
-                  <p>This section controls where the Open Modmail panel goes, where modmail channels are created, and what members see.</p>
-                </div>
-                <div class="status-pill"><span class="status-dot"></span> ${modmailReady}</div>
-              </div>
-              <form method="post" action="/admin/save-modmail">
-                <label for="modmailGuildId">Modmail guild ID</label>
-                <input id="modmailGuildId" name="modmailGuildId" value="${escapeHtml(botConfig.modmailGuildId)}" placeholder="Discord server ID">
-
-                <label for="modmailCategoryId">Modmail category ID</label>
-                <input id="modmailCategoryId" name="modmailCategoryId" value="${escapeHtml(botConfig.modmailCategoryId)}" placeholder="Category ID for modmail channels">
-
-                <label for="modmailPanelChannelId">Modmail panel channel</label>
-                <select id="modmailPanelChannelId" name="modmailPanelChannelId">
-                  ${renderTextChannelOptions(botConfig.modmailPanelChannelId)}
-                </select>
-                <div class="hint">Save this channel, then use <code>/modmail panel</code> in Discord to post the Open Modmail panel there. You can also pass a channel directly in the command.</div>
-
-                <label for="modmailIntroText">Modmail intro text</label>
-                <textarea id="modmailIntroText" name="modmailIntroText" required>${escapeHtml(botConfig.modmailIntroText)}</textarea>
-
-                <label for="modmailOpenedText">Modmail opened reply</label>
-                <textarea id="modmailOpenedText" name="modmailOpenedText" required>${escapeHtml(botConfig.modmailOpenedText)}</textarea>
 
                 <label for="modmailClosedText">Modmail closed reply</label>
                 <textarea id="modmailClosedText" name="modmailClosedText" required>${escapeHtml(botConfig.modmailClosedText)}</textarea>
@@ -1992,6 +2163,66 @@ client.on("interactionCreate", async (interaction) => {
       return;
     }
 
+    if (interaction.commandName === "help") {
+      await interaction.reply({
+        embeds: [
+          new EmbedBuilder()
+            .setTitle("ETC Help")
+            .setDescription(`Use slash commands like /help, /rules, /info, and /modmail panel, or text commands like =help, =rules, =info, and =close.`)
+            .addFields(
+              { name: "Modmail", value: "DM the bot or use /modmail panel to post a modmail button." },
+              { name: "Rules", value: "Use /rules or =rules to open the rules channel." },
+              { name: "Close", value: "Use /close modmail or =close to close your support request." }
+            )
+            .setColor(0x1ff2d2)
+        ],
+        ephemeral: true
+      });
+      return;
+    }
+
+    if (interaction.commandName === "rules") {
+      const guild = interaction.guild;
+      const rulesChannel = guild ? findRulesChannel(guild) : null;
+      if (rulesChannel) {
+        await interaction.reply({ content: `Please read the rules in ${rulesChannel}.`, ephemeral: true });
+      } else if (guild) {
+        await interaction.reply({ content: "Please ask a staff member for the rules channel or set rulesChannelId in the bot config.", ephemeral: true });
+      } else {
+        await interaction.reply({ content: "Use this command in the server to get the rules channel.", ephemeral: true });
+      }
+      return;
+    }
+
+    if (interaction.commandName === "info") {
+      const queryType = interaction.options.getString("type") || "server";
+      const guild = interaction.guild;
+      const infoEmbed = new EmbedBuilder().setTitle("ETC Info").setColor(0x1ff2d2);
+
+      if (queryType === "bot") {
+        infoEmbed.setDescription(`Bot is online and ready. Latency: ${client.ws.ping}ms.`);
+        infoEmbed.addFields(
+          { name: "Panel Port", value: `${port}`, inline: true },
+          { name: "Modmail", value: isModmailConfigured() ? "Configured" : "Not configured", inline: true }
+        );
+      } else if (queryType === "etc") {
+        infoEmbed.setDescription("EU Tuning Crew support bot is here to help with modmail, logs, and server utilities.");
+      } else {
+        if (!guild) {
+          infoEmbed.setDescription("Use /info bot for bot details, or use this command in a server for server info.");
+        } else {
+          infoEmbed.setDescription(`${guild.name} has ${guild.memberCount} members.`);
+          const rulesChannel = findRulesChannel(guild);
+          if (rulesChannel) {
+            infoEmbed.addFields({ name: "Rules Channel", value: `${rulesChannel}`, inline: true });
+          }
+        }
+      }
+
+      await interaction.reply({ embeds: [infoEmbed], ephemeral: true });
+      return;
+    }
+
     if (interaction.commandName === "modmail") {
       if (interaction.options.getSubcommand() !== "panel") return;
       if (!interaction.memberPermissions?.has(PermissionsBitField.Flags.ManageGuild)) {
@@ -2155,55 +2386,46 @@ function renderWelcomeEmbedForMember(member) {
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
 
-  const isCloseModmailCommand = message.content.trim().toLowerCase() === "./close modmail";
+  const prefixCommand = parsePrefixCommand(message);
+  if (prefixCommand) {
+    const handled = await handleTextCommand(message, prefixCommand);
+    if (handled) return;
+  }
 
   if (message.channel.type === ChannelType.DM) {
-    try {
-      const embed = renderWelcomeEmbedForMember(message.member || message.guild?.members?.cache?.get(message.author.id) || message.author);
-      await message.author.send({ embeds: [embed] }).catch(() => {});
-    } catch {
-      // ignore DM welcome errors
-    }
-
-
-
+    const existingTicket = getTicketByUserId(message.author.id);
 
     // PV / auto-modmail behavior: if user DMs the bot and has no open ticket,
     // auto-open a modmail channel and forward their message.
-    if (!isCloseModmailCommand) {
-      const existingTicket = getTicketByUserId(message.author.id);
-      if (!existingTicket || existingTicket.status !== "open") {
-        if (botConfig.pvModmailEnabled) {
-          const opened = await openTicketForUser(message.author);
-          if (opened) {
-            const relay = formatMessageContent(message);
-            if (relay) {
-              const staffChannel = await client.channels.fetch(opened.channelId).catch(() => null);
-              if (staffChannel?.isTextBased()) {
-                const title = botConfig.pvDmEmbedTitle || "PV";
-                const descTemplate = botConfig.pvDmEmbedDescription || "${content}";
-                const desc = descTemplate.replaceAll("${content}", escapeForEmbedText(relay));
-                const embed = new EmbedBuilder()
-                  .setTitle(title)
-                  .setDescription(desc)
-                  .setFooter({ text: `${message.author.tag} • ${message.author.id}` })
-                  .setColor(botConfig.pvDmEmbedColor ? Number(botConfig.pvDmEmbedColor) : 0x1ff2d2);
-                if (botConfig.pvDmEmbedImageUrl) embed.setImage(botConfig.pvDmEmbedImageUrl);
-                await staffChannel.send({ embeds: [embed] }).catch(() => {});
-              }
+    if (!existingTicket || existingTicket.status !== "open") {
+      if (botConfig.pvModmailEnabled) {
+        const opened = await openTicketForUser(message.author);
+        if (opened) {
+          const relay = formatMessageContent(message);
+          if (relay) {
+            const staffChannel = await client.channels.fetch(opened.channelId).catch(() => null);
+            if (staffChannel?.isTextBased()) {
+              const title = botConfig.pvDmEmbedTitle || "PV";
+              const descTemplate = botConfig.pvDmEmbedDescription || "${content}";
+              const desc = descTemplate.replaceAll("${content}", escapeForEmbedText(relay));
+              const embed = new EmbedBuilder()
+                .setTitle(title)
+                .setDescription(desc)
+                .setFooter({ text: `${message.author.tag} • ${message.author.id}` })
+                .setColor(botConfig.pvDmEmbedColor ? Number(botConfig.pvDmEmbedColor) : 0x1ff2d2);
+              if (botConfig.pvDmEmbedImageUrl) embed.setImage(botConfig.pvDmEmbedImageUrl);
+              await staffChannel.send({ embeds: [embed] }).catch(() => {});
             }
           }
         }
         return;
       }
-    }
-    if (isCloseModmailCommand) {
-      const ticket = getTicketByUserId(message.author.id);
-      if (!ticket || ticket.status !== "open") {
-        await message.author.send("You do not have an open modmail right now.");
-        return;
+
+      if (!modmailHomePrompted.has(message.author.id)) {
+        await sendModmailHome(message.author, "Press Open Modmail first, then send your message.");
+      } else {
+        await message.author.send("Please press Open Modmail or use =help to see available commands.").catch(() => {});
       }
-      await closeTicket(ticket, "user");
       return;
     }
 
@@ -2239,11 +2461,6 @@ client.on("messageCreate", async (message) => {
 
   const ticket = getTicketByChannelId(message.channelId);
   if (!ticket || ticket.status !== "open") return;
-
-  if (isCloseModmailCommand) {
-    await closeTicket(ticket, "staff");
-    return;
-  }
 
   const relay = formatMessageContent(message);
   if (!relay) return;
