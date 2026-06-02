@@ -18,7 +18,15 @@ const ownerPassword = process.env.OWNER_PASSWORD || panelPassword;
 const adminPassword = process.env.ADMIN_PASSWORD || "etc-admin";
 const cookieSecret = process.env.COOKIE_SECRET || ownerPassword || panelPassword;
 const maxAgeSeconds = 60 * 60 * 12;
-const botApiUrl = process.env.BOT_API_URL || process.env.WISPBYTE_BOT_API_URL || process.env.LOCAL_BOT_API_URL || "http://127.0.0.1:10001";
+
+function normalizeUrl(value) {
+  if (!value) return "";
+  return value.trim().replace(/\/+$/, "");
+}
+
+const remoteBotApiUrl = normalizeUrl(process.env.BOT_API_URL || process.env.WISPBYTE_BOT_API_URL);
+const localBotApiUrl = normalizeUrl(process.env.LOCAL_BOT_API_URL || (process.env.BOT_PANEL_PORT ? `http://127.0.0.1:${process.env.BOT_PANEL_PORT}` : "http://127.0.0.1:10001"));
+let botApiUrl = remoteBotApiUrl || localBotApiUrl;
 const botApiSecret = process.env.BOT_API_SECRET || process.env.PANEL_API_SECRET || "";
 
 const fallbackConfig = {
@@ -636,24 +644,36 @@ function getPanelPath(req) {
 }
 
 async function callBotApi(path, init = {}) {
+  async function fetchFromUrl(url) {
+    const response = await fetch(new URL(path, url), {
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        ...(botApiSecret ? { Authorization: `Bearer ${botApiSecret}` } : {}),
+        ...(init.headers || {})
+      }
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(payload.error || `Bot API returned HTTP ${response.status}`);
+    }
+    return payload;
+  }
+
   if (!botApiUrl) {
     throw new Error("BOT_API_URL is not configured.");
   }
 
-  const response = await fetch(new URL(path, botApiUrl), {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(botApiSecret ? { Authorization: `Bearer ${botApiSecret}` } : {}),
-      ...(init.headers || {})
+  try {
+    return await fetchFromUrl(botApiUrl);
+  } catch (firstError) {
+    if (remoteBotApiUrl && localBotApiUrl && remoteBotApiUrl !== localBotApiUrl) {
+      botApiUrl = localBotApiUrl;
+      return await fetchFromUrl(localBotApiUrl);
     }
-  });
-
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    throw new Error(payload.error || `Bot API returned HTTP ${response.status}`);
+    throw firstError;
   }
-  return payload;
 }
 
 async function loadPanelState() {
@@ -665,7 +685,7 @@ async function loadPanelState() {
     config: { ...fallbackConfig, ...(state?.config || {}) },
     stats: {
       botTag: "Wispbyte bot",
-      discordMode: botApiUrl ? "Connected to Wispbyte API" : "BOT_API_URL missing",
+      discordMode: botApiUrl ? "Connected to bot API" : "BOT_API_URL missing",
       guilds: 0,
       openTickets: 0,
       activeWarns: 0,
