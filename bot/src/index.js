@@ -491,6 +491,68 @@ function renderTextChannelOptions(selectedChannelId = "") {
   ].join("");
 }
 
+function renderGuildOptions(selectedGuildId = "") {
+  const guilds = client.guilds.cache
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const selectedIsLoaded = guilds.some((guild) => guild.id === selectedGuildId);
+  const fallbackOption = selectedGuildId && !selectedIsLoaded
+    ? `<option value="${escapeHtml(selectedGuildId)}" selected>Saved guild (${escapeHtml(selectedGuildId)})</option>`
+    : "";
+
+  return [
+    `<option value="">Select a guild</option>`,
+    fallbackOption,
+    ...guilds.map((guild) =>
+      `<option value="${escapeHtml(guild.id)}"${guild.id === selectedGuildId ? " selected" : ""}>${escapeHtml(guild.name)}</option>`
+    )
+  ].join("");
+}
+
+function renderCategoryOptions(selectedCategoryId = "") {
+  const guild = getConfiguredGuildFromCache();
+  const categories = guild
+    ? [...guild.channels.cache.values()]
+        .filter((channel) => channel.type === ChannelType.GuildCategory)
+        .sort((a, b) => a.name.localeCompare(b.name))
+    : [];
+
+  const selectedIsLoaded = categories.some((category) => category.id === selectedCategoryId);
+  const fallbackOption = selectedCategoryId && !selectedIsLoaded
+    ? `<option value="${escapeHtml(selectedCategoryId)}" selected>Saved category (${escapeHtml(selectedCategoryId)})</option>`
+    : "";
+
+  return [
+    `<option value="">Select a category</option>`,
+    fallbackOption,
+    ...categories.map((category) =>
+      `<option value="${escapeHtml(category.id)}"${category.id === selectedCategoryId ? " selected" : ""}>${escapeHtml(category.name)}</option>`
+    )
+  ].join("");
+}
+
+function renderRoleOptions(selectedRoleId = "") {
+  const guild = getConfiguredGuildFromCache();
+  const roles = guild
+    ? [...guild.roles.cache.values()]
+        .filter((role) => role.id !== guild.id)
+        .sort((a, b) => b.position - a.position)
+    : [];
+
+  const selectedIsLoaded = roles.some((role) => role.id === selectedRoleId);
+  const fallbackOption = selectedRoleId && !selectedIsLoaded
+    ? `<option value="${escapeHtml(selectedRoleId)}" selected>Saved role (${escapeHtml(selectedRoleId)})</option>`
+    : "";
+
+  return [
+    `<option value="">Select a role</option>`,
+    fallbackOption,
+    ...roles.map((role) =>
+      `<option value="${escapeHtml(role.id)}"${role.id === selectedRoleId ? " selected" : ""}>@${escapeHtml(role.name)}</option>`
+    )
+  ].join("");
+}
+
 function formatMessageContent(message) {
   const parts = [];
   if (message.content?.trim()) {
@@ -1638,9 +1700,17 @@ function renderAdminPage(message = "", role = "admin") {
               <textarea id="pingReply" name="pingReply" required>${escapeHtml(botConfig.pingReply)}</textarea>
               <div class="hint">Use <code>{ping}</code> in the ping reply if you want the bot latency to appear automatically.</div>
 
-              <label for="noPingStaffRoleId">Staff role ID for no-ping warns</label>
-              <input id="noPingStaffRoleId" name="noPingStaffRoleId" value="${escapeHtml(botConfig.noPingStaffRoleId)}" placeholder="Discord Staff role ID">
-              <div class="hint">Only this role gets protected. If empty, the bot protects a role named <code>staff</code>.</div>
+              <label for="noPingStaffRoleId">Protected staff role for no-ping warns</label>
+              <select id="noPingStaffRoleId" name="noPingStaffRoleId">
+                ${renderRoleOptions(botConfig.noPingStaffRoleId)}
+              </select>
+              <div class="hint">The selected role is protected from no-ping warnings. If empty, the bot will fall back to a role named <code>staff</code>.</div>
+
+              <label for="rulesChannelId">Rules channel</label>
+              <select id="rulesChannelId" name="rulesChannelId">
+                ${renderTextChannelOptions(botConfig.rulesChannelId)}
+              </select>
+              <div class="hint">Choose the channel used by /rules and =rules commands.</div>
 
               <div class="buttons">
                 <button type="submit">Save bot settings</button>
@@ -1713,17 +1783,21 @@ function renderAdminPage(message = "", role = "admin") {
               <div class="status-pill"><span class="status-dot"></span> ${modmailReady}</div>
 
               <form method="post" action="/admin/save-modmail">
-                <label for="modmailGuildId">Modmail guild ID</label>
-                <input id="modmailGuildId" name="modmailGuildId" value="${escapeHtml(botConfig.modmailGuildId)}" placeholder="Discord server ID">
+                <label for="modmailGuildId">Modmail guild</label>
+                <select id="modmailGuildId" name="modmailGuildId">
+                  ${renderGuildOptions(botConfig.modmailGuildId)}
+                </select>
 
-                <label for="modmailCategoryId">Modmail category ID</label>
-                <input id="modmailCategoryId" name="modmailCategoryId" value="${escapeHtml(botConfig.modmailCategoryId)}" placeholder="Category ID for modmail channels">
+                <label for="modmailCategoryId">Modmail category</label>
+                <select id="modmailCategoryId" name="modmailCategoryId">
+                  ${renderCategoryOptions(botConfig.modmailCategoryId)}
+                </select>
 
                 <label for="modmailPanelChannelId">Modmail panel channel</label>
                 <select id="modmailPanelChannelId" name="modmailPanelChannelId">
                   ${renderTextChannelOptions(botConfig.modmailPanelChannelId)}
                 </select>
-                <div class="hint">Save this channel, then use <code>/modmail panel</code> in Discord to post the Open Modmail panel there. You can also pass a channel directly in the command.</div>
+                <div class="hint">Save this channel, then use <code>/modmail panel</code> in Discord to post the Open Modmail panel there.</div>
 
                 <label for="modmailIntroText">Modmail intro text</label>
                 <textarea id="modmailIntroText" name="modmailIntroText" required>${escapeHtml(botConfig.modmailIntroText)}</textarea>
@@ -1739,32 +1813,6 @@ function renderAdminPage(message = "", role = "admin") {
                   <a class="tab-button" href="#preview" data-tab-target="preview"><button class="ghost" type="button">See Preview</button></a>
                 </div>
               </form>
-              <div class="view-heading">
-                <div class="stack-card">
-                  <div class="section-note">Support</div>
-                  <h2>Modmail Setup</h2>
-                  <p>This section controls where the Open Modmail panel goes, where modmail channels are created, and what members see.</p>
-                </div>
-                <div class="status-pill"><span class="status-dot"></span> ${modmailReady}</div>
-              </div>
-              <form method="post" action="/admin/save-modmail">
-                <label for="modmailGuildId">Modmail guild ID</label>
-                <input id="modmailGuildId" name="modmailGuildId" value="${escapeHtml(botConfig.modmailGuildId)}" placeholder="Discord server ID">
-
-                <label for="modmailCategoryId">Modmail category ID</label>
-                <input id="modmailCategoryId" name="modmailCategoryId" value="${escapeHtml(botConfig.modmailCategoryId)}" placeholder="Category ID for modmail channels">
-
-                <label for="modmailPanelChannelId">Modmail panel channel</label>
-                <select id="modmailPanelChannelId" name="modmailPanelChannelId">
-                  ${renderTextChannelOptions(botConfig.modmailPanelChannelId)}
-                </select>
-                <div class="hint">Save this channel, then use <code>/modmail panel</code> in Discord to post the Open Modmail panel there. You can also pass a channel directly in the command.</div>
-
-                <label for="modmailIntroText">Modmail intro text</label>
-                <textarea id="modmailIntroText" name="modmailIntroText" required>${escapeHtml(botConfig.modmailIntroText)}</textarea>
-
-                <label for="modmailOpenedText">Modmail opened reply</label>
-                <textarea id="modmailOpenedText" name="modmailOpenedText" required>${escapeHtml(botConfig.modmailOpenedText)}</textarea>
 
                 <label for="modmailClosedText">Modmail closed reply</label>
                 <textarea id="modmailClosedText" name="modmailClosedText" required>${escapeHtml(botConfig.modmailClosedText)}</textarea>
