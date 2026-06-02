@@ -1,11 +1,24 @@
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import { config as dotenvConfig } from "dotenv";
+import { existsSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const currentDir = dirname(fileURLToPath(import.meta.url));
+const rootEnv = join(currentDir, ".env");
+const botEnv = join(currentDir, "bot", ".env");
+
+dotenvConfig({ path: rootEnv });
+if (existsSync(botEnv)) {
+  dotenvConfig({ path: botEnv });
+}
 
 const panelPassword = process.env.PANEL_PASSWORD || "etc-panel";
 const ownerPassword = process.env.OWNER_PASSWORD || panelPassword;
 const adminPassword = process.env.ADMIN_PASSWORD || "etc-admin";
 const cookieSecret = process.env.COOKIE_SECRET || ownerPassword || panelPassword;
 const maxAgeSeconds = 60 * 60 * 12;
-const botApiUrl = process.env.BOT_API_URL || process.env.WISPBYTE_BOT_API_URL || (process.env.NODE_ENV !== "production" ? "http://localhost:10001" : "");
+const botApiUrl = process.env.BOT_API_URL || process.env.WISPBYTE_BOT_API_URL || process.env.LOCAL_BOT_API_URL || "http://127.0.0.1:10001";
 const botApiSecret = process.env.BOT_API_SECRET || process.env.PANEL_API_SECRET || "";
 
 const fallbackConfig = {
