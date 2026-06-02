@@ -25,7 +25,9 @@ function normalizeUrl(value) {
 }
 
 const remoteBotApiUrl = normalizeUrl(process.env.BOT_API_URL || process.env.WISPBYTE_BOT_API_URL);
-const localBotApiUrl = normalizeUrl(process.env.LOCAL_BOT_API_URL || (process.env.BOT_PANEL_PORT ? `http://127.0.0.1:${process.env.BOT_PANEL_PORT}` : "http://127.0.0.1:10001"));
+const explicitLocalBotApiUrl = normalizeUrl(process.env.LOCAL_BOT_API_URL);
+const devLocalBotApiUrl = process.env.NODE_ENV === "production" ? "" : normalizeUrl(`http://127.0.0.1:${process.env.BOT_PANEL_PORT || 10001}`);
+const localBotApiUrl = explicitLocalBotApiUrl || devLocalBotApiUrl;
 let botApiUrl = remoteBotApiUrl || localBotApiUrl;
 const botApiSecret = process.env.BOT_API_SECRET || process.env.PANEL_API_SECRET || "";
 
@@ -671,7 +673,8 @@ async function callBotApi(path, init = {}) {
   try {
     return await fetchFromUrl(botApiUrl);
   } catch (firstError) {
-    if (remoteBotApiUrl && localBotApiUrl && remoteBotApiUrl !== localBotApiUrl) {
+    const canUseLocalFallback = process.env.NODE_ENV !== "production" && remoteBotApiUrl && localBotApiUrl && remoteBotApiUrl !== localBotApiUrl;
+    if (canUseLocalFallback) {
       botApiUrl = localBotApiUrl;
       return await fetchFromUrl(localBotApiUrl);
     }
