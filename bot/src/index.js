@@ -37,6 +37,86 @@ const sessions = new Map();
 const modmailHomePrompted = new Set();
 const noPingMuteMs = 1000 * 60 * 60 * 3;
 
+// Backend integration for panel (external API)
+const BACKEND_URL = process.env.BACKEND_URL || process.env.BOT_BACKEND_URL || "http://localhost:3001";
+const BACKEND_API_KEY = process.env.BOT_API_SECRET || process.env.PANEL_API_SECRET || "";
+
+let _backendToken = null;
+let _backendTokenExpires = 0;
+
+async function fetchBackendToken() {
+  if (!BACKEND_API_KEY) return null;
+  const now = Date.now();
+  if (_backendToken && now < _backendTokenExpires - 5000) return _backendToken; // cached
+  try {
+    const res = await fetch(new URL('/auth', BACKEND_URL).toString(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKey: BACKEND_API_KEY })
+    });
+    if (!res.ok) {
+      const txt = await res.text().catch(() => '');
+      console.warn('Backend token fetch failed', res.status, txt);
+      return null;
+    }
+    const data = await res.json();
+    _backendToken = data.token;
+    // parse expiry loosely from JWT or use expiresIn
+    _backendTokenExpires = Date.now() + (parseExpiryMs(data.expiresIn) || (60 * 60 * 1000));
+    return _backendToken;
+  } catch (err) {
+    console.warn('Error fetching backend token', err?.message || err);
+    return null;
+  }
+}
+
+function parseExpiryMs(expiresIn) {
+  if (!expiresIn) return 0;
+  if (typeof expiresIn === 'number') return expiresIn * 1000;
+  if (typeof expiresIn === 'string') {
+    // common formats: '1h', '3600s', '60m'
+    const m = expiresIn.match(/^(\d+)([smhd])$/);
+    if (m) {
+      const v = Number(m[1]);
+      const unit = m[2];
+      switch (unit) {
+        case 's': return v * 1000;
+        case 'm': return v * 60 * 1000;
+        case 'h': return v * 60 * 60 * 1000;
+        case 'd': return v * 24 * 60 * 60 * 1000;
+      }
+    }
+    const asNum = Number(expiresIn);
+    if (!Number.isNaN(asNum)) return asNum * 1000;
+  }
+  return 0;
+}
+
+async function postBackendStatus(status) {
+  const token = await fetchBackendToken();
+  if (!token) return false;
+  try {
+    const res = await fetch(new URL('/api/status', BACKEND_URL).toString(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify(status)
+    });
+    if (!res.ok) {
+      const txt = await res.text().catch(() => '');
+      console.warn('Failed to post status to backend', res.status, txt);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('Error posting status to backend', err?.message || err);
+    return false;
+  }
+}
+
+
 const contentTypes = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
@@ -1935,6 +2015,26 @@ function startPanelServer() {
         return;
       }
 
+      if (url.pathname === "/api/guilds") {
+        if (!isPanelApiAuthorized(req)) {
+          sendJson(res, 401, { error: "Unauthorized" });
+          return;
+        }
+        if (!client.isReady()) {
+          sendJson(res, 503, { error: 'discord_not_ready' });
+          return;
+        }
+        const guilds = [...client.guilds.cache.values()].map(g => ({
+          id: g.id,
+          name: g.name,
+          channels: [...g.channels.cache.values()]
+            .filter(ch => ch.isTextBased && ch.isTextBased())
+            .map(ch => ({ id: ch.id, name: ch.name, type: ch.type }))
+        }));
+        sendJson(res, 200, { guilds });
+        return;
+      }
+
       if (url.pathname === "/api/panel-config") {
         if (!isPanelApiAuthorized(req)) {
           sendJson(res, 401, { error: "Unauthorized" });
@@ -2489,6 +2589,32 @@ async function start() {
     if (discordReady) {
       await registerCommands();
       await client.login(token);
+
+      client.once('ready', async () => {
+        try {
+          const status = {
+            uptime: process.uptime(),
+            guildCount: client.guilds.cache.size,
+            ping: client.ws?.ping || 0,
+            bot: client.user ? `${client.user.username}#${client.user.discriminator || ''}`.replace(/#$/,'') : null,
+            timestamp: new Date().toISOString(),
+            config: { activityText: botConfig.activityText }
+          };
+          await postBackendStatus(status);
+          // periodic heartbeat every 60s
+          setInterval(() => {
+            const s = {
+              uptime: process.uptime(),
+              guildCount: client.guilds.cache.size,
+              ping: client.ws?.ping || 0,
+              timestamp: new Date().toISOString()
+            };
+            postBackendStatus(s).catch(() => {});
+          }, 60 * 1000);
+        } catch (err) {
+          console.warn('Error sending initial backend status', err?.message || err);
+        }
+      });
     } else {
       console.log("Discord token or client ID missing. Starting panel-only mode.");
     }

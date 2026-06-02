@@ -529,7 +529,7 @@ function renderAdmin(role, message = "", state = { config: fallbackConfig, stats
               <h1>ETC Bot Control Panel</h1>
               <p>Manage bot behavior and server integrations from one place. If the bot status shows an error, check the BOT_API_URL or local panel connection.</p>
             </div>
-            <div class="status-pill"><span class="status-dot"></span> ${escapeHtml(stats.discordMode || "Waiting")}</div>
+            <div class="status-pill"><span class="status-dot"></span> <span id="statusText">${escapeHtml(stats.discordMode || "Waiting")}</span></div>
           </div>
           ${message ? `<div class="message success">✓ ${escapeHtml(message)}</div>` : ""}
           ${state.error ? `<div class="message error">✗ ${escapeHtml(state.error)}</div>` : ""}
@@ -540,11 +540,132 @@ function renderAdmin(role, message = "", state = { config: fallbackConfig, stats
           </div>
 
           <div class="stats-grid">
-            <div class="stat-card"><strong>Bot Tag</strong><div class="stat-value">${escapeHtml(stats.botTag || "Unknown")}</div></div>
-            <div class="stat-card"><strong>Guilds</strong><div class="stat-value">${escapeHtml(stats.guilds ?? 0)}</div></div>
-            <div class="stat-card"><strong>Open Modmail</strong><div class="stat-value">${escapeHtml(stats.openTickets ?? 0)}</div></div>
-            <div class="stat-card"><strong>Mode</strong><div class="stat-value">${escapeHtml(stats.discordMode || "Unknown")}</div></div>
+            <div class="stat-card"><strong>Bot Tag</strong><div class="stat-value"><span id="botTagValue">${escapeHtml(stats.botTag || "Unknown")}</span></div></div>
+            <div class="stat-card"><strong>Guilds</strong><div class="stat-value"><span id="guildsValue">${escapeHtml(stats.guilds ?? 0)}</span></div></div>
+            <div class="stat-card"><strong>Open Modmail</strong><div class="stat-value"><span id="openTicketsValue">${escapeHtml(stats.openTickets ?? 0)}</span></div></div>
+            <div class="stat-card"><strong>Mode</strong><div class="stat-value"><span id="modeValue">${escapeHtml(stats.discordMode || "Unknown")}</span></div></div>
           </div>
+          <script>
+            (function(){
+              const statusTextEl = document.getElementById('statusText');
+              const botTagEl = document.getElementById('botTagValue');
+              const guildsEl = document.getElementById('guildsValue');
+              const openTicketsEl = document.getElementById('openTicketsValue');
+              const modeEl = document.getElementById('modeValue');
+
+              async function fetchToken(){
+                try{
+                  const res = await fetch('/api/get-token', { credentials: 'same-origin' });
+                  if(!res.ok) {
+                    const errText = await res.text().catch(() => '');
+                    console.warn('token fetch bad status', res.status, errText);
+                    return null;
+                  }
+                  const json = await res.json();
+                  return json.token || null;
+                }catch(e){ console.warn('token fetch failed', e); return null; }
+              }
+
+              function toWsUrl(botApiUrl, token){
+                try{
+                  const u = new URL(botApiUrl);
+                  u.protocol = u.protocol === 'https:' ? 'wss:' : 'ws:';
+                  u.pathname = '/ws';
+                  u.search = 'token=' + encodeURIComponent(token);
+                  return u.toString();
+                }catch(e){ return null; }
+              }
+
+              function handleMsg(msg){
+                if(!msg || !msg.type) return;
+                if(msg.type === 'initial'){
+                  const p = msg.payload || {};
+                  if(p.status){ if(modeEl) modeEl.textContent = p.status.mode || p.status.statusText || modeEl.textContent; if(guildsEl && p.status.guildCount!=null) guildsEl.textContent = String(p.status.guildCount); if(botTagEl && p.status.bot) botTagEl.textContent = p.status.bot; }
+                  if(p.commands && openTicketsEl) openTicketsEl.textContent = String(p.commands.length || 0);
+                } else if(msg.type === 'status:update'){
+                  const s = msg.payload || {};
+                  if(modeEl && s.mode) modeEl.textContent = s.mode;
+                  if(guildsEl && s.guildCount!=null) guildsEl.textContent = String(s.guildCount);
+                  if(botTagEl && s.bot) botTagEl.textContent = s.bot;
+                } else if(msg.type === 'settings:update'){
+                  // optionally refresh UI
+                } else if(msg.type === 'commands:create'){
+                  if(openTicketsEl){ openTicketsEl.textContent = String(Number(openTicketsEl.textContent || 0) + 1); }
+                } else if(msg.type === 'commands:delete'){
+                  if(openTicketsEl){ openTicketsEl.textContent = String(Math.max(0, Number(openTicketsEl.textContent || 0) - 1)); }
+                }
+              }
+
+              (async function init(){
+                const token = await fetchToken();
+                if(!token){ if(statusTextEl) statusTextEl.textContent = 'No token'; return; }
+                const wsUrl = toWsUrl('${botApiUrl}', token);
+                if(!wsUrl){ if(statusTextEl) statusTextEl.textContent = 'Invalid bot URL'; return; }
+                try{
+                  const ws = new WebSocket(wsUrl);
+                  ws.addEventListener('open', ()=>{ if(statusTextEl) statusTextEl.textContent = 'Connected'; });
+                  ws.addEventListener('message', (ev)=>{ try{ const m = JSON.parse(ev.data); handleMsg(m); }catch(e){} });
+                  ws.addEventListener('close', ()=>{ if(statusTextEl) statusTextEl.textContent = 'Disconnected'; });
+                }catch(e){ if(statusTextEl) statusTextEl.textContent = 'WS failed'; }
+              })();
+
+              // Guilds & channels selector logic
+              async function fetchGuilds(){
+                try{
+                  const res = await fetch('/api/get-guilds', { credentials: 'same-origin' });
+                  if(!res.ok) {
+                    const errText = await res.text().catch(() => '');
+                    throw new Error(`status ${res.status}: ${errText}`);
+                  }
+                  const json = await res.json();
+                  return json.guilds || [];
+                }catch(e){ console.warn('fetchGuilds error', e); return []; }
+              }
+
+              function populateGuilds(guilds){
+                const guildSelect = document.getElementById('modmailGuildId');
+                const channelSelect = document.getElementById('modmailPanelChannelId');
+                if(!guildSelect || !channelSelect) return;
+                // clear existing non-saved options
+                guildSelect.querySelectorAll('option[data-generated]').forEach(o=>o.remove());
+                channelSelect.querySelectorAll('option[data-generated]').forEach(o=>o.remove());
+                guilds.forEach(g=>{
+                  const opt = document.createElement('option');
+                  opt.value = g.id;
+                  opt.textContent = g.name;
+                  opt.setAttribute('data-generated','1');
+                  guildSelect.appendChild(opt);
+                });
+                guildSelect.addEventListener('change', ()=>{
+                  const gid = guildSelect.value;
+                  const g = guilds.find(x=>x.id===gid);
+                  // populate channels
+                  channelSelect.querySelectorAll('option[data-generated]').forEach(o=>o.remove());
+                  if(g && g.channels){
+                    g.channels.forEach(ch=>{
+                      const o = document.createElement('option');
+                      o.value = ch.id;
+                      o.textContent = `#${ch.name}`;
+                      o.setAttribute('data-generated','1');
+                      channelSelect.appendChild(o);
+                    });
+                  }
+                });
+              }
+
+              document.addEventListener('DOMContentLoaded', ()=>{
+                const btn = document.getElementById('loadGuildsBtn');
+                if(btn){
+                  btn.addEventListener('click', async ()=>{
+                    btn.disabled = true; btn.textContent = 'Loading...';
+                    const guilds = await fetchGuilds();
+                    populateGuilds(guilds);
+                    btn.disabled = false; btn.textContent = 'Load guilds';
+                  });
+                }
+              });
+            })();
+          </script>
         </div>
 
         <section id="overview" class="section-panel">
@@ -588,16 +709,25 @@ function renderAdmin(role, message = "", state = { config: fallbackConfig, stats
             <div class="form-section">
               <div class="form-section-title">Modmail Configuration</div>
               <div class="form-group">
-                <label for="modmailGuildId">Modmail Guild ID</label>
-                <input id="modmailGuildId" name="modmailGuildId" value="${escapeHtml(config.modmailGuildId)}" placeholder="Guild ID for modmail">
+                <label for="modmailGuildId">Modmail Guild</label>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <select id="modmailGuildId" name="modmailGuildId">
+                    <option value="">Select a guild</option>
+                    ${config.modmailGuildId ? `<option value="${escapeHtml(config.modmailGuildId)}" selected>Saved (${escapeHtml(config.modmailGuildId)})</option>` : ""}
+                  </select>
+                  <button type="button" id="loadGuildsBtn">Load guilds</button>
+                </div>
               </div>
               <div class="form-group">
-                <label for="modmailCategoryId">Modmail Category ID</label>
+                <label for="modmailCategoryId">Modmail Category ID (optional)</label>
                 <input id="modmailCategoryId" name="modmailCategoryId" value="${escapeHtml(config.modmailCategoryId)}" placeholder="Optional channel category ID">
               </div>
               <div class="form-group">
-                <label for="modmailPanelChannelId">Modmail Panel Channel ID</label>
-                <input id="modmailPanelChannelId" name="modmailPanelChannelId" value="${escapeHtml(config.modmailPanelChannelId)}" placeholder="Optional panel channel ID">
+                <label for="modmailPanelChannelId">Modmail Panel Channel</label>
+                <select id="modmailPanelChannelId" name="modmailPanelChannelId">
+                  <option value="">Select a channel</option>
+                  ${config.modmailPanelChannelId ? `<option value="${escapeHtml(config.modmailPanelChannelId)}" selected>Saved (${escapeHtml(config.modmailPanelChannelId)})</option>` : ""}
+                </select>
               </div>
               <div class="form-group">
                 <label for="modmailIntroText">Modmail Intro Text</label>
@@ -751,6 +881,63 @@ export default async function handler(req, res) {
       redirect(res, "/api/panel?panelPath=/login", {
         "Set-Cookie": "etc_panel_session=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0"
       });
+      return;
+    }
+
+    // Server-side token exchange for authenticated panel clients
+    if (req.method === "GET" && path === "/admin/get-token") {
+      if (!readSession(req)) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'unauthorized' }));
+        return;
+      }
+      if (!botApiUrl || !botApiSecret) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'bot_api_not_configured' }));
+        return;
+      }
+      try {
+        const target = new URL('/auth', botApiUrl).toString();
+        const r = await fetch(target, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ apiKey: botApiSecret })
+        });
+        const payload = await r.json().catch(() => ({}));
+        res.writeHead(r.status, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(payload));
+      } catch (err) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: String(err) }));
+      }
+      return;
+    }
+
+    // Server-side proxy to fetch guilds and channels from the bot
+    if (req.method === "GET" && path === "/admin/get-guilds") {
+      if (!readSession(req)) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'unauthorized' }));
+        return;
+      }
+      if (!botApiUrl || !botApiSecret) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'bot_api_not_configured' }));
+        return;
+      }
+      try {
+        const target = new URL('/api/guilds', botApiUrl).toString();
+        const r = await fetch(target, {
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${botApiSecret}` }
+        });
+        const payload = await r.json().catch(() => ({}));
+        res.writeHead(r.status, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(payload));
+      } catch (err) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: String(err) }));
+      }
       return;
     }
 
