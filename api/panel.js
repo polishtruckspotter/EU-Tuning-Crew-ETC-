@@ -21,7 +21,7 @@ const maxAgeSeconds = 60 * 60 * 12;
 
 function normalizeUrl(value) {
   if (!value) return "";
-  return value.trim().replace(/\/+$/, "");
+  return value.trim().replace(/\/+$/g, "").replace(/\/api$/i, "");
 }
 
 const remoteBotApiUrl = normalizeUrl(process.env.BOT_API_URL || process.env.WISPBYTE_BOT_API_URL);
@@ -645,18 +645,21 @@ function getPanelPath(req) {
 
 async function callBotApi(path, init = {}) {
   async function fetchFromUrl(url) {
-    const response = await fetch(new URL(path, url), {
+    const target = new URL(path, url);
+    const response = await fetch(target, {
       ...init,
       headers: {
         "Content-Type": "application/json",
         ...(botApiSecret ? { Authorization: `Bearer ${botApiSecret}` } : {}),
         ...(init.headers || {})
       }
+    }).catch((error) => {
+      throw new Error(`fetch failed to ${target.href}: ${error.message}`);
     });
 
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
-      throw new Error(payload.error || `Bot API returned HTTP ${response.status}`);
+      throw new Error(payload.error || `Bot API returned HTTP ${response.status} from ${target.href}`);
     }
     return payload;
   }
