@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "node server.mjs",
-    "start": "node bot/src/index.js",
+    "start": "node index.js",
     "bot": "node bot/src/index.js"
   },
   "dependencies": {

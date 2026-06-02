@@ -78,7 +78,39 @@ const defaultConfig = {
   pvServerEmbedTitle: "PV (Server)",
   pvServerEmbedDescription: "${content}",
   pvServerEmbedColor: "0x1ff2d2",
-  pvServerEmbedImageUrl: ""
+  pvServerEmbedImageUrl: "",
+
+  // Ticket System
+  ticketSystemEnabled: false,
+  ticketCategoryId: "",
+  ticketPanelChannelId: "",
+  ticketIntroText: "Click the button below to create a support ticket.",
+
+  // Auto-Moderation
+  autoModEnabled: false,
+  spamFilterEnabled: false,
+  spamThreshold: 5,
+  capsFilterEnabled: false,
+  profanityFilterEnabled: false,
+  inviteFilterEnabled: false,
+
+  // Member Tracking
+  memberTrackingEnabled: false,
+  memberLogChannelId: "",
+
+  // Leveling System
+  levelingEnabled: false,
+  levelAnnouncementChannelId: "",
+
+  // Message Logging
+  messageLoggingEnabled: false,
+  messageLogChannelId: "",
+
+  // Reaction Roles
+  reactionRolesEnabled: false,
+
+  // Voting/Polls
+  votingEnabled: false
 };
 
 let botConfig = { ...defaultConfig };
@@ -97,6 +129,41 @@ const commands = [
   new SlashCommandBuilder()
     .setName("panel")
     .setDescription("Show the bot panel link."),
+  new SlashCommandBuilder()
+    .setName("help")
+    .setDescription("Show all available ETC bot commands and features."),
+  new SlashCommandBuilder()
+    .setName("rules")
+    .setDescription("Display the EU Tuning Crew server rules."),
+  new SlashCommandBuilder()
+    .setName("info")
+    .setDescription("Get information about the server or bot.")
+    .addStringOption((option) =>
+      option
+        .setName("type")
+        .setDescription("What information do you want?")
+        .addChoices(
+          { name: "Server Info", value: "server" },
+          { name: "Bot Info", value: "bot" },
+          { name: "ETC Info", value: "etc" }
+        )
+        .setRequired(false)
+    ),
+  new SlashCommandBuilder()
+    .setName("report")
+    .setDescription("Report a user for rule violations.")
+    .addUserOption((option) =>
+      option
+        .setName("user")
+        .setDescription("User to report")
+        .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("reason")
+        .setDescription("Reason for the report")
+        .setRequired(true)
+    ),
   new SlashCommandBuilder()
     .setName("modmail")
     .setDescription("Configure or post the ETC modmail panel.")
@@ -120,6 +187,76 @@ const commands = [
       subcommand
         .setName("modmail")
         .setDescription("Close this modmail and delete its channel.")
+    ),
+  new SlashCommandBuilder()
+    .setName("warn")
+    .setDescription("Give a warning to a user.")
+    .setDefaultMemberPermissions(PermissionsBitField.Flags.ModerateMembers)
+    .addUserOption((option) =>
+      option
+        .setName("user")
+        .setDescription("User to warn")
+        .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("reason")
+        .setDescription("Reason for the warning")
+        .setRequired(true)
+    ),
+  new SlashCommandBuilder()
+    .setName("kick")
+    .setDescription("Kick a member from the server.")
+    .setDefaultMemberPermissions(PermissionsBitField.Flags.KickMembers)
+    .addUserOption((option) =>
+      option
+        .setName("user")
+        .setDescription("User to kick")
+        .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("reason")
+        .setDescription("Reason for the kick")
+        .setRequired(false)
+    ),
+  new SlashCommandBuilder()
+    .setName("ban")
+    .setDescription("Ban a member from the server.")
+    .setDefaultMemberPermissions(PermissionsBitField.Flags.BanMembers)
+    .addUserOption((option) =>
+      option
+        .setName("user")
+        .setDescription("User to ban")
+        .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("reason")
+        .setDescription("Reason for the ban")
+        .setRequired(false)
+    ),
+  new SlashCommandBuilder()
+    .setName("mute")
+    .setDescription("Mute a member for a specified duration.")
+    .setDefaultMemberPermissions(PermissionsBitField.Flags.ModerateMembers)
+    .addUserOption((option) =>
+      option
+        .setName("user")
+        .setDescription("User to mute")
+        .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("duration")
+        .setDescription("Duration (e.g., 1h, 30m, 1d)")
+        .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("reason")
+        .setDescription("Reason for the mute")
+        .setRequired(false)
     ),
   new SlashCommandBuilder()
     .setName("noping")
@@ -1818,6 +1955,15 @@ function startPanelServer() {
     }
   });
 
+  server.on("error", (error) => {
+    if (error.code === "EADDRINUSE") {
+      console.error(`Port ${port} is already in use. Stop the process using it or set BOT_PANEL_PORT to a different port.`);
+    } else {
+      console.error("Bot panel server error:", error);
+    }
+    process.exit(1);
+  });
+
   server.listen(port, () => {
     console.log(`ETC website and bot panel running at http://localhost:${port}`);
   });
@@ -2131,6 +2277,10 @@ async function start() {
     }
   } catch (error) {
     console.error("Failed to start the ETC bot.");
+    if (error?.code === 401 || String(error).includes("401")) {
+      console.error("Discord login failed: unauthorized. Check DISCORD_TOKEN and CLIENT_ID in bot/.env and regenerate the bot token if needed.");
+      return;
+    }
     console.error(error);
     process.exit(1);
   }
